@@ -43,7 +43,7 @@ struct player{
   }
 
   bool EndSearch(){
-    if(map[x+1][y] != '.' && map[x-1][y] != '.' && map[x][y+1] != '.' && map[x][y-1] != '.'){
+    if((map[x+1][y] != '.' || x+1 >= 35)&& (map[x-1][y] != '.' || x-1 < 0) && (map[x][y+1] != '.' || y+1 >= 20) && (map[x][y-1] != '.' || y-1 < 0)){
       return true;
     }else{
       return false;
@@ -98,13 +98,15 @@ bool area(player p){
         ans++;
       }
     }
-    if(ans >= 100)return false;
+    if(ans >= 100)break;
   }
+  cerr << ans << endl;
+  if(ans >= 100) return false;
   return true;
 }
 
 void next(player& p,int gameRound,int notfree){
-  if((map[p.x+p.vec[0].x][p.y+p.vec[0].y] != '.' || map[p.x+p.vec[1].x][p.y+p.vec[1].y] != '.') && !p.EndSearch() && area(p)){
+  if(/*(map[p.x+p.vec[0].x][p.y+p.vec[0].y] != '.' || map[p.x+p.vec[1].x][p.y+p.vec[1].y] != '.') &&*/ !p.EndSearch() && area(p)){
     p.search = true;
   }
   if(p.search){
@@ -148,6 +150,7 @@ void next(player& p,int gameRound,int notfree){
 
 int main(){
   int opponentCount;
+  int preBack[4] = {0};
   cin >> opponentCount; std::cin.ignore();
   int notfree = 0;
   player me;
@@ -172,7 +175,8 @@ int main(){
 
     int backInTimeLeft;
     cin >> me.x >> me.y >> backInTimeLeft; cin.ignore();
-    //if(backInTimeLeft == 1) change = true;
+    if(backInTimeLeft != preBack[0]) change = true;
+    preBack[0] = backInTimeLeft;
     if(me.tox == -1 && me.tox == -1){
       me.tox = me.x;
       me.toy = me.y;
@@ -183,7 +187,8 @@ int main(){
       opponentPoints[i].x = opponentX;
       opponentPoints[i].y = opponentY;
       opponentScore[i] = 0;
-      //if(opponentBackInLeft == 1) change = true;
+      if(opponentBackInLeft != preBack[i+1]) change = true;
+      preBack[i+1] = opponentBackInLeft;
     }
     prescore = me.score;
     me.score = 0;
@@ -211,43 +216,16 @@ int main(){
         time = rand() % 16 + 10;
         me.back = true;
       }
+      int n=0;
       while(map[me.tox][me.toy] != '.' /*|| notfree == 10*/){
         notfree = 0;
         me.tox = rand() % 35;
         me.toy = rand() % 20;
+        n++;
+        if(n > 10000) break;
       }
       change = true;
     }
-
-    if(!me.search){
-      int dist=100;
-      int max = -1;
-      for (int i=0; i < opponentCount; i++) {
-        if(dist > abs(me.x-opponentPoints[i].x) + abs(me.y-opponentPoints[i].y)){
-          dist = abs(me.x-opponentPoints[i].x) + abs(me.y-opponentPoints[i].y);
-          target = i;
-        }
-        /*if(max < opponentScore[i]){
-          max = opponentScore[i];
-          target = i;
-          }*/
-      }
-    }
-
-    /*if(me.tox < 17){
-      me.tox = opponentPoints[target].x + 1;
-    }else{
-      me.tox = opponentPoints[target].x - 1;
-    }
-    if(me.tox < 0) me.tox = 0;
-    if(me.tox >= 35) me.tox = 34;
-    if(me.toy < 10){
-      me.toy = opponentPoints[target].y + 1;
-    }else{
-      me.toy = opponentPoints[target].y - 1;
-    }
-    if(me.toy < 0) me.toy = 0;
-    if(me.toy >= 20) me.toy = 19;*/
 
     me.checkVec(change);
     next(me,gameRound,notfree);
@@ -256,6 +234,7 @@ int main(){
       cout << "BACK " << time <<endl;
     }else{
       cerr << me.search << endl;
+      cerr << me.EndSearch() << endl;
       cerr << me.tox << " " << me.toy << endl;
       cerr << me.vec[0].x << " " << me.vec[0].y << endl;
       cerr << me.vec[1].x << " " << me.vec[1].y << endl;
