@@ -2,16 +2,27 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <stack>
 
 using namespace std;
-
-
-char map[35][20];
 
 struct point
 {
   int x,y;
+
+  point inv(){
+    point p;
+    p.x = -x;
+    p.y = -y;
+    return p;
+  }
 };
+
+char map[35][20];
+point opponentPoints[3];
+int opponentScore[3];
+int target;
+
 
 struct player{
   int x,y;
@@ -19,19 +30,12 @@ struct player{
   bool back;
   int score;
   bool search;
+  bool attack;
   point vec[2];
 
   //前後左右の確認
-  bool inMapX(){
-    if (x + vec[0].x >= 0 && x+vec[0].x < 35 && x + vec[1].x >= 0 && x+vec[1].x < 35) {
-      return true;
-    }else{
-      return false;
-    }
-  }
-
-  bool inMapY(){
-    if (y + vec[0].y >= 0 && y+vec[0].y < 20 && y + vec[1].y >= 0 && y+vec[1].y < 20) {
+    bool inMap(point v){
+    if(0 <= x+v.x && 35 > x+v.x && 0 <= y+v.y && 20 > y+v.y){
       return true;
     }else{
       return false;
@@ -63,7 +67,7 @@ struct player{
         vec[1].y = 1;
       }
       search = false;
-    }else if((map[x+vec[0].x][y+vec[0].y] != '.' || !inMapX()) && (map[x+vec[1].x][y+vec[1].y] != '.' || !inMapY())){
+    }else if((map[x+vec[0].x][y+vec[0].y] != '.' || !inMap(vec[0])) && (map[x+vec[1].x][y+vec[1].y] != '.' || !inMap(vec[1]))){
       vec[0].x = -vec[0].x;
       vec[1].y = -vec[1].y;
     }
@@ -71,13 +75,40 @@ struct player{
 
 };
 
+bool area(player p){
+  bool end[35][20] ={{false}};
+  int dx[4] = {1,0,-1,0};
+  int dy[4] = {0,1,0,-1};
+  stack<point> dfs;
+  point now;
+  int ans = 0;
+  now.x = p.x;
+  now.y = p.y;
+  dfs.push(now);
+  while(!dfs.empty()){
+    now = dfs.top();
+    dfs.pop();
+    for (int i=0; i < 4; i++) {
+      if(map[now.x+dx[i]][now.y+dy[i]] == '.' && !end[now.x+dx[i]][now.y+dy[i]]){
+        point a;
+        a.x = now.x+dx[i];
+        a.y = now.y+dy[i];
+        dfs.push(a);
+        end[a.x][a.y] = true;
+        ans++;
+      }
+    }
+    if(ans >= 100)return false;
+  }
+  return true;
+}
 
-void next(player& p){
-  if((map[p.x+p.vec[0].x][p.y+p.vec[0].y] != '.' || map[p.x+p.vec[1].x][p.y+p.vec[1].y] != '.') && !p.EndSearch()){
+void next(player& p,int gameRound,int notfree){
+  if((map[p.x+p.vec[0].x][p.y+p.vec[0].y] != '.' || map[p.x+p.vec[1].x][p.y+p.vec[1].y] != '.') && !p.EndSearch() && area(p)){
     p.search = true;
   }
   if(p.search){
-    if(map[p.x+p.vec[0].x][p.y+p.vec[0].y] == '.' && p.inMapX()){
+    if(map[p.x+p.vec[0].x][p.y+p.vec[0].y] == '.' && p.inMap(p.vec[0])){
       p.x += p.vec[0].x;
       p.y += p.vec[0].y;
     }else{
@@ -85,12 +116,31 @@ void next(player& p){
       p.y += p.vec[1].y;
     }
   }else{
-    if(p.x != p.tox){
+    if(map[p.x+p.vec[0].x][p.y+p.vec[0].y] == '.' && p.inMap(p.vec[0]) && p.x != p.tox){
       p.x += p.vec[0].x;
       p.y += p.vec[0].y;
-    }else{
+    }else if(map[p.x+p.vec[1].x][p.y+p.vec[1].y] == '.' && p.inMap(p.vec[1]) && p.y != p.toy){
       p.x += p.vec[1].x;
       p.y += p.vec[1].y;
+    }else if (notfree >= 5){
+      if(map[p.x-p.vec[0].x][p.y-p.vec[0].y] == '.' && p.inMap(p.vec[0].inv())){
+        p.x -= p.vec[0].x;
+        p.y -= p.vec[0].y;
+      }else if(map[p.x-p.vec[1].x][p.y-p.vec[1].y] == '.' && p.inMap(p.vec[1].inv())){
+        p.x -= p.vec[1].x;
+        p.y -= p.vec[1].y;
+      }else{
+        p.x = p.tox;
+        p.y = p.toy;
+      }
+    }else{
+      if(p.inMap(p.vec[0]) && p.x != p.tox){
+        p.x += p.vec[0].x;
+        p.y += p.vec[0].y;
+      }else if(p.inMap(p.vec[1]) && p.y != p.toy){
+        p.x += p.vec[1].x;
+        p.y += p.vec[1].y;
+      }
     }
 
   }
@@ -101,6 +151,7 @@ int main(){
   cin >> opponentCount; std::cin.ignore();
   int notfree = 0;
   player me;
+  me.attack = true;
   me.tox = -1;
   me.toy = -1;
   me.back = false;
@@ -129,6 +180,9 @@ int main(){
     for (int i= 0; i<opponentCount; i++) {
       int opponentX,opponentY,opponentBackInLeft;
       cin >> opponentX >> opponentY >> opponentBackInLeft; cin.ignore();
+      opponentPoints[i].x = opponentX;
+      opponentPoints[i].y = opponentY;
+      opponentScore[i] = 0;
       //if(opponentBackInLeft == 1) change = true;
     }
     prescore = me.score;
@@ -140,6 +194,8 @@ int main(){
         map[j][i] = line[j];
         if(line[j] == '0'){
           me.score++;
+        }else if(line[j] != '.'){
+          opponentScore[line[j] - '0']++;
         }
       }
     }
@@ -150,12 +206,12 @@ int main(){
     }
 
 
-    if((me.tox == me.x && me.toy == me.y) || notfree == 10){
+    if(((me.tox == me.x && me.toy == me.y) || map[me.tox][me.toy] != '.') && !me.search/*|| notfree == 10*/){
       if(rand() % 3 == 1 && !me.back && gameRound > 30 && map[me.tox][me.toy] != '0' && notfree != 10){
         time = rand() % 16 + 10;
         me.back = true;
       }
-      while(map[me.tox][me.toy] != '.' || notfree == 10){
+      while(map[me.tox][me.toy] != '.' /*|| notfree == 10*/){
         notfree = 0;
         me.tox = rand() % 35;
         me.toy = rand() % 20;
@@ -163,19 +219,46 @@ int main(){
       change = true;
     }
 
-    me.checkVec(change);
+    if(!me.search){
+      int dist=100;
+      int max = -1;
+      for (int i=0; i < opponentCount; i++) {
+        if(dist > abs(me.x-opponentPoints[i].x) + abs(me.y-opponentPoints[i].y)){
+          dist = abs(me.x-opponentPoints[i].x) + abs(me.y-opponentPoints[i].y);
+          target = i;
+        }
+        /*if(max < opponentScore[i]){
+          max = opponentScore[i];
+          target = i;
+          }*/
+      }
+    }
 
-    next(me);
+    /*if(me.tox < 17){
+      me.tox = opponentPoints[target].x + 1;
+    }else{
+      me.tox = opponentPoints[target].x - 1;
+    }
+    if(me.tox < 0) me.tox = 0;
+    if(me.tox >= 35) me.tox = 34;
+    if(me.toy < 10){
+      me.toy = opponentPoints[target].y + 1;
+    }else{
+      me.toy = opponentPoints[target].y - 1;
+    }
+    if(me.toy < 0) me.toy = 0;
+    if(me.toy >= 20) me.toy = 19;*/
+
+    me.checkVec(change);
+    next(me,gameRound,notfree);
 
     if (time != 0) {
       cout << "BACK " << time <<endl;
     }else{
-      cerr << (!me.inMapX() && !me.inMapY()) << endl;
       cerr << me.search << endl;
       cerr << me.tox << " " << me.toy << endl;
       cerr << me.vec[0].x << " " << me.vec[0].y << endl;
       cerr << me.vec[1].x << " " << me.vec[1].y << endl;
-      cerr << me.score << " " << prescore << " " << notfree << endl;
       cout << me.x << " " << me.y << endl;
     }
 
