@@ -1,0 +1,9 @@
+# Samurai Database
+6
+"players/"
+"Masamune" "JinoAI" "$1"
+"Kenshin" "JinoAI" "$1"
+"Shingen" "JinoAI" "$1"
+"Ujiyasu" "greedyPlayer" "$1"
+"Nagamasa" "greedyPlayer" "$1"
+"Yoshikage" "greedyPlayer" "$1"
