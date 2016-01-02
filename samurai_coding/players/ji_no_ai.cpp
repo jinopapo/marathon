@@ -14,8 +14,8 @@ struct JinoAI: Player {
   const int weaponsAreaY[3][7] = {
     {1, 2, 3, 4, 0, 0, 0},
     {1, 2, 0, 1, 0, 0, 0},
-    {-1,-1,1, 1, 1,-1, 0}};
-  const int dangerousCost = 40;
+    {-1,0,1, 1, 1,-1, 0}};
+  const int dangerousCost = 20;
   const int killCost = 40;
 
   bool inField(int x,int y,GameInfo& info){
@@ -28,7 +28,7 @@ struct JinoAI: Player {
 
   bool isMove(SamuraiInfo& me,GameInfo& info,int x, int y){
     if(!inField(x,y,info)) return false;
-    if(!me.hidden) return true;
+    if(me.hidden == 0) return true;
     if(info.field[x+y*info.width] >= 3) return false;
     return true;
   }
@@ -119,7 +119,7 @@ struct JinoAI: Player {
         if(!inField(x,y,info)) continue;
         for(int j=0;j<4;j++){
           int change=attackArea(me,info,j,me.curX,me.curY);
-          if(maxChange < change && change >= 40){
+          if(maxChange < change && change >= killCost){
             action = j+1;
             move = m;
           }
@@ -127,29 +127,26 @@ struct JinoAI: Player {
         }
       }
     }
-    if(move != -1)actions.push_back(move);
+    if(move != -1){
+      if(me.hidden) actions.push_back(10);
+      actions.push_back(move);
+    }
     actions.push_back(action);
     return actions;
   }
 
   int moveAction(SamuraiInfo& me,GameInfo& info){
     int action=-1;
-    int maxChange=0;
-    /*for(int i=0;i<4;i++){
-      int change = attackArea(me,info,i,me.curX,me.curY);
-      maxChange = max(maxChange,change);
-      }*/
+    int maxChange=-1000;
     for(int i=0;i<4;i++){
       int nowx = me.curX+nextx[i];
       int nowy = me.curY+nexty[i];
-      if(!isMove(me,info,nowx,nowy))continue;
+      //if(!isMove(me,info,nowx,nowy))continue;
       for(int j=0;j<4;j++){
         int attackScore = attackArea(me,info,j,nowx,nowy);
-        //if(maxChange < attackScore){
-          int change = attackScore + fearArea(me,info,i,nowx,nowy) - dangerousArea(info,nowx,nowy);
-          if(maxChange < change) action = i+5;
-          maxChange = max(maxChange,change);
-          //}
+        int change = attackScore + fearArea(me,info,i,nowx,nowy) - dangerousArea(info,nowx,nowy);
+        if(maxChange < change) action = i+5;
+        maxChange = max(maxChange,change);
       }
     }
     return action;
@@ -174,10 +171,6 @@ struct JinoAI: Player {
     while(power > 1){
       int action = 0;
       if(attack(me,info) && power >= 5){
-        if(me.hidden){
-          power -= required[10];
-          info.doAction(10);
-        }
         vector<int> actions;
         actions = attackAction(me,info,power);
         for(auto a:actions){
@@ -197,10 +190,10 @@ struct JinoAI: Player {
         me.curY += nexty[action-5];
       }
     }
-    if(info.field[me.curX+me.curY*info.width] < 3 && power == 1){
+    /*if(info.field[me.curX+me.curY*info.width] < 3 && power == 1){
       power -= required[9];
       info.doAction(9);
-    }
+      }*/
   }
 };
 
