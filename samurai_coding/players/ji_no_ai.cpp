@@ -60,6 +60,7 @@ struct JinoAI: Player {
     int score=0;
     for(int i=0;i<7;i++){
       int rx,ry;
+      if(weaponsAreaX[info.weapon][i] == 0 && weaponsAreaY[info.weapon][i] == 0) continue;
       rotate(direction,weaponsAreaX[info.weapon][i],weaponsAreaY[info.weapon][i],rx,ry);
       int wx = x+rx;
       int wy = y+ry;
