@@ -120,7 +120,6 @@ struct JinoAI: Player {
         for(int j=0;j<4;j++){
           int change=attackArea(me,info,j,x,y);
           if(maxChange < change && change >= killCost){
-            cerr << m << endl;
             action = j+1;
             move = m+5;
           }
@@ -141,7 +140,7 @@ struct JinoAI: Player {
     for(int i=0;i<4;i++){
       int nowx = me.curX+nextx[i];
       int nowy = me.curY+nexty[i];
-      //if(!isMove(me,info,nowx,nowy))continue;
+      if(!isMove(me,info,nowx,nowy))continue;
       for(int j=0;j<4;j++){
         int attackScore = attackArea(me,info,j,nowx,nowy);
         int change = attackScore + fearArea(me,info,i,nowx,nowy) - dangerousArea(info,nowx,nowy);
@@ -178,7 +177,6 @@ struct JinoAI: Player {
           info.doAction(10);
         }
         for(auto a:actions){
-          if(actions.size() >= 2) cerr << a << endl;
           action = a;
           power -= required[action];
           info.doAction(action);
