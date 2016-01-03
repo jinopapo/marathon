@@ -112,23 +112,23 @@ struct JinoAI: Player {
       if(maxChange < change) action = j+1;
       maxChange = max(maxChange,change);
     }
-    if(!me.hidden && power == 7){
+    if(power == 7){
       for(int m=0;m<4;m++){
-        int x = me.curX+maskx[m];
-        int y = me.curX+masky[m];
+        int x = me.curX+nextx[m];
+        int y = me.curY+nexty[m];
         if(!inField(x,y,info)) continue;
         for(int j=0;j<4;j++){
-          int change=attackArea(me,info,j,me.curX,me.curY);
+          int change=attackArea(me,info,j,x,y);
           if(maxChange < change && change >= killCost){
+            cerr << m << endl;
             action = j+1;
-            move = m;
+            move = m+5;
           }
           maxChange = max(maxChange,change);
         }
       }
     }
     if(move != -1){
-      if(me.hidden) actions.push_back(10);
       actions.push_back(move);
     }
     actions.push_back(action);
@@ -173,7 +173,12 @@ struct JinoAI: Player {
       if(attack(me,info) && power >= 5){
         vector<int> actions;
         actions = attackAction(me,info,power);
+        if(me.hidden){
+          power -= required[10];
+          info.doAction(10);
+        }
         for(auto a:actions){
+          if(actions.size() >= 2) cerr << a << endl;
           action = a;
           power -= required[action];
           info.doAction(action);
@@ -190,10 +195,10 @@ struct JinoAI: Player {
         me.curY += nexty[action-5];
       }
     }
-    /*if(info.field[me.curX+me.curY*info.width] < 3 && power == 1){
+    if(info.field[me.curX+me.curY*info.width] < 3 && power == 1){
       power -= required[9];
       info.doAction(9);
-      }*/
+    }
   }
 };
 
