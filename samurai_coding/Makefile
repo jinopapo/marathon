@@ -1,10 +1,10 @@
 all: managerDir playersDir
 
-TAGS: manager/*.cpp manager/*.hpp players/*.cpp players/*.hpp
+TAGS: manager1.1/*.cpp manager1.1/*.hpp players/*.cpp players/*.hpp
 	etags $^
 
 managerDir:
-	cd manager; make
+	cd manager1.1; make
 
 playersDir:
 	cd players; make
@@ -16,4 +16,3 @@ clean:
 	rm -f TAGS *~
 	cd manager; make clean
 	cd players; make clean
-	cd setting; make clean
