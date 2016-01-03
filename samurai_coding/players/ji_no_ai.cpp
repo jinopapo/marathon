@@ -58,7 +58,7 @@ struct JinoAI: Player {
 
   int attackArea(SamuraiInfo& me,GameInfo& info,int direction,int x,int y){
     int score=0;
-    for(int i=0;i<8;i++){
+    for(int i=0;i<7;i++){
       int rx,ry;
       rotate(direction,weaponsAreaX[info.weapon][i],weaponsAreaY[info.weapon][i],rx,ry);
       int wx = x+rx;
