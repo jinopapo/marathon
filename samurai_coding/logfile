@@ -70,7 +70,7 @@
 # <think time> <used time>
 100 0
 # Actions
-1 7 0
+3 7 0
 # Comments
 ""
 # Turn 5/192
@@ -106,7 +106,7 @@
 # <think time> <used time>
 100 0
 # Actions
-2 7 9 0
+2 7 0
 # Comments
 ""
 # Turn 9/192
@@ -133,7 +133,7 @@
 # <think time> <used time>
 100 0
 # Actions
-4 7 0
+2 7 0
 # Comments
 ""
 # Turn 12/192
@@ -169,16 +169,16 @@
 # <think time> <used time>
 100 0
 # Actions
-10 2 9 0
+2 9 6 0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 16/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-4 8 9 0
+2 8 0
 # Comments
 ""
 # Turn 17/192
@@ -214,9 +214,9 @@
 # <think time> <used time>
 100 0
 # Actions
-6 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 21/192
 # <samurai id>
 4
@@ -241,9 +241,9 @@
 # <think time> <used time>
 100 0
 # Actions
-10 3 9 0
+1 9 8 0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 24/192
 # <samurai id>
 0
@@ -277,18 +277,18 @@
 # <think time> <used time>
 100 0
 # Actions
-6 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 28/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 29/192
 # <samurai id>
 5
@@ -322,9 +322,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 33/192
 # <samurai id>
 4
@@ -349,9 +349,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 36/192
 # <samurai id>
 0
@@ -385,18 +385,18 @@
 # <think time> <used time>
 100 0
 # Actions
-6 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 40/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 41/192
 # <samurai id>
 5
@@ -430,9 +430,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 45/192
 # <samurai id>
 4
@@ -457,9 +457,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 48/192
 # <samurai id>
 0
@@ -493,25 +493,25 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 52/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 53/192
 # <samurai id>
 5
 # <think time> <used time>
 100 0
 # Actions
-10 5 4 0
+5 10 2 0
 # Comments
 ""
 # Turn 54/192
@@ -540,7 +540,7 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 57/192
 # <samurai id>
 4
@@ -565,9 +565,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 60/192
 # <samurai id>
 0
@@ -603,16 +603,16 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 64/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 65/192
 # <samurai id>
 5
@@ -648,7 +648,7 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 69/192
 # <samurai id>
 4
@@ -673,18 +673,18 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 72/192
 # <samurai id>
 0
 # <think time> <used time>
 100 0
 # Actions
-10 3 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+"Hidden samurai tried occupation"
 # Turn 73/192
 # <samurai id>
 3
@@ -709,18 +709,18 @@
 # <think time> <used time>
 100 0
 # Actions
-6 6 6 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 76/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 77/192
 # <samurai id>
 5
@@ -745,18 +745,18 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 80/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-10 2 7 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 81/192
 # <samurai id>
 4
@@ -772,7 +772,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 4 0
+6 1 9 0
 # Comments
 ""
 # Turn 83/192
@@ -781,7 +781,7 @@
 # <think time> <used time>
 100 0
 # Actions
-6 1 9 0
+0
 # Comments
 ""
 # Turn 84/192
@@ -790,9 +790,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 85/192
 # <samurai id>
 3
@@ -819,14 +819,14 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 88/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-6 10 1 0
+0
 # Comments
 ""
 # Turn 89/192
@@ -835,7 +835,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 1 9 0
+6 10 3 0
 # Comments
 ""
 # Turn 90/192
@@ -844,7 +844,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 3 9 0
+5 4 9 0
 # Comments
 ""
 # Turn 91/192
@@ -853,9 +853,9 @@
 # <think time> <used time>
 100 0
 # Actions
-6 10 3 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 92/192
 # <samurai id>
 1
@@ -864,7 +864,7 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 93/192
 # <samurai id>
 4
@@ -880,7 +880,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+7 2 9 0
 # Comments
 ""
 # Turn 95/192
@@ -889,7 +889,7 @@
 # <think time> <used time>
 100 0
 # Actions
-2 9 5 0
+0
 # Comments
 ""
 # Turn 96/192
@@ -898,16 +898,16 @@
 # <think time> <used time>
 100 0
 # Actions
-6 3 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 97/192
 # <samurai id>
 3
 # <think time> <used time>
 100 0
 # Actions
-7 10 3 0
+6 10 3 0
 # Comments
 ""
 # Turn 98/192
@@ -927,23 +927,23 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 100/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-10 2 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 101/192
 # <samurai id>
 5
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+6 10 1 0
 # Comments
 ""
 # Turn 102/192
@@ -952,7 +952,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 3 9 0
+6 3 9 0
 # Comments
 ""
 # Turn 103/192
@@ -961,25 +961,25 @@
 # <think time> <used time>
 100 0
 # Actions
-6 10 3 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 104/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-1 6 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 105/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-0
+7 2 9 0
 # Comments
 ""
 # Turn 106/192
@@ -988,7 +988,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+6 1 9 0
 # Comments
 ""
 # Turn 107/192
@@ -997,25 +997,25 @@
 # <think time> <used time>
 100 0
 # Actions
-10 3 9 0
+3 7 0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 108/192
 # <samurai id>
 0
 # <think time> <used time>
 100 0
 # Actions
-6 1 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 109/192
 # <samurai id>
 3
 # <think time> <used time>
 100 0
 # Actions
-8 10 3 0
+5 10 4 0
 # Comments
 ""
 # Turn 110/192
@@ -1024,7 +1024,7 @@
 # <think time> <used time>
 100 0
 # Actions
-0
+8 10 3 0
 # Comments
 ""
 # Turn 111/192
@@ -1033,16 +1033,16 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 112/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-0
+2 7 0
 # Comments
 ""
 # Turn 113/192
@@ -1051,7 +1051,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
 ""
 # Turn 114/192
@@ -1060,7 +1060,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 3 9 0
+5 4 9 0
 # Comments
 ""
 # Turn 115/192
@@ -1069,25 +1069,25 @@
 # <think time> <used time>
 100 0
 # Actions
-10 3 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+"Hidden samurai tried occupation"
 # Turn 116/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-6 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 117/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-0
+7 3 9 0
 # Comments
 ""
 # Turn 118/192
@@ -1096,7 +1096,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
 ""
 # Turn 119/192
@@ -1114,16 +1114,16 @@
 # <think time> <used time>
 100 0
 # Actions
-6 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 121/192
 # <samurai id>
 3
 # <think time> <used time>
 100 0
 # Actions
-8 10 3 0
+5 10 4 0
 # Comments
 ""
 # Turn 122/192
@@ -1132,7 +1132,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 3 9 0
+7 10 2 0
 # Comments
 ""
 # Turn 123/192
@@ -1141,9 +1141,9 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 124/192
 # <samurai id>
 2
@@ -1159,7 +1159,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
 ""
 # Turn 126/192
@@ -1168,7 +1168,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 3 9 0
+5 4 9 0
 # Comments
 ""
 # Turn 127/192
@@ -1179,23 +1179,23 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 128/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-6 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 129/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-8 10 4 0
+8 3 9 0
 # Comments
 ""
 # Turn 130/192
@@ -1204,7 +1204,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
 ""
 # Turn 131/192
@@ -1213,7 +1213,7 @@
 # <think time> <used time>
 100 0
 # Actions
-1 7 0
+0
 # Comments
 ""
 # Turn 132/192
@@ -1224,14 +1224,14 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 133/192
 # <samurai id>
 3
 # <think time> <used time>
 100 0
 # Actions
-10 8 3 0
+8 10 4 0
 # Comments
 ""
 # Turn 134/192
@@ -1240,7 +1240,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 4 9 0
+8 10 3 0
 # Comments
 ""
 # Turn 135/192
@@ -1249,16 +1249,16 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 136/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-2 7 0
+0
 # Comments
 ""
 # Turn 137/192
@@ -1267,7 +1267,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+8 3 9 0
 # Comments
 ""
 # Turn 138/192
@@ -1276,7 +1276,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 3 9 0
+7 4 9 0
 # Comments
 ""
 # Turn 139/192
@@ -1287,23 +1287,23 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 140/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 141/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-5 10 4 0
+8 4 9 0
 # Comments
 ""
 # Turn 142/192
@@ -1312,7 +1312,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+8 10 3 0
 # Comments
 ""
 # Turn 143/192
@@ -1321,7 +1321,7 @@
 # <think time> <used time>
 100 0
 # Actions
-4 6 9 0
+0
 # Comments
 ""
 # Turn 144/192
@@ -1332,14 +1332,14 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 145/192
 # <samurai id>
 3
 # <think time> <used time>
 100 0
 # Actions
-5 10 1 0
+7 10 4 0
 # Comments
 ""
 # Turn 146/192
@@ -1348,7 +1348,7 @@
 # <think time> <used time>
 100 0
 # Actions
-5 4 9 0
+8 10 4 0
 # Comments
 ""
 # Turn 147/192
@@ -1357,25 +1357,25 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 148/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-10 1 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 149/192
 # <samurai id>
 5
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+8 3 9 0
 # Comments
 ""
 # Turn 150/192
@@ -1384,7 +1384,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 1 9 0
+7 4 9 0
 # Comments
 ""
 # Turn 151/192
@@ -1393,64 +1393,19 @@
 # <think time> <used time>
 100 0
 # Actions
-3 6 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 152/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-1 9 6 0
-# Comments
-""
-# Turn 153/192
-# <samurai id>
-4
-# <think time> <used time>
-100 0
-# Actions
-5 10 4 0
-# Comments
-""
-# Turn 154/192
-# <samurai id>
-5
-# <think time> <used time>
-100 0
-# Actions
-7 10 2 0
-# Comments
-""
-# Turn 155/192
-# <samurai id>
-2
-# <think time> <used time>
-100 0
-# Actions
-7 10 2 0
-# Comments
-""
-# Turn 156/192
-# <samurai id>
 0
-# <think time> <used time>
-100 0
-# Actions
-10 2 5 0
 # Comments
-""
-# Turn 157/192
-# <samurai id>
-3
-# <think time> <used time>
-100 0
-# Actions
-10 8 1 0
-# Comments
-""
-# Turn 158/192
+"Hidden samurai tried occupation"
+# Turn 153/192
 # <samurai id>
 4
 # <think time> <used time>
@@ -1459,22 +1414,67 @@
 5 4 9 0
 # Comments
 ""
+# Turn 154/192
+# <samurai id>
+5
+# <think time> <used time>
+100 0
+# Actions
+8 10 3 0
+# Comments
+""
+# Turn 155/192
+# <samurai id>
+2
+# <think time> <used time>
+100 0
+# Actions
+3 7 0
+# Comments
+""
+# Turn 156/192
+# <samurai id>
+0
+# <think time> <used time>
+100 0
+# Actions
+0
+# Comments
+"Hidden samurai tried occupation"
+# Turn 157/192
+# <samurai id>
+3
+# <think time> <used time>
+100 0
+# Actions
+8 10 3 0
+# Comments
+""
+# Turn 158/192
+# <samurai id>
+4
+# <think time> <used time>
+100 0
+# Actions
+8 10 4 0
+# Comments
+""
 # Turn 159/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-10 3 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+"Hidden samurai tried occupation"
 # Turn 160/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+2 8 0
 # Comments
 ""
 # Turn 161/192
@@ -1483,7 +1483,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 2 9 0
+5 2 9 0
 # Comments
 ""
 # Turn 162/192
@@ -1492,7 +1492,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 1 9 0
+5 4 9 0
 # Comments
 ""
 # Turn 163/192
@@ -1501,7 +1501,7 @@
 # <think time> <used time>
 100 0
 # Actions
-2 9 6 0
+0
 # Comments
 ""
 # Turn 164/192
@@ -1510,16 +1510,16 @@
 # <think time> <used time>
 100 0
 # Actions
-10 4 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+"Hidden samurai tried occupation"
 # Turn 165/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-5 10 4 0
+5 4 9 0
 # Comments
 ""
 # Turn 166/192
@@ -1528,7 +1528,7 @@
 # <think time> <used time>
 100 0
 # Actions
-8 10 1 0
+5 10 2 0
 # Comments
 ""
 # Turn 167/192
@@ -1537,7 +1537,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 10 2 0
+3 9 7 0
 # Comments
 ""
 # Turn 168/192
@@ -1546,16 +1546,16 @@
 # <think time> <used time>
 100 0
 # Actions
-10 1 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 169/192
 # <samurai id>
 3
 # <think time> <used time>
 100 0
 # Actions
-0
+5 10 4 0
 # Comments
 ""
 # Turn 170/192
@@ -1564,7 +1564,7 @@
 # <think time> <used time>
 100 0
 # Actions
-5 1 9 0
+5 10 4 0
 # Comments
 ""
 # Turn 171/192
@@ -1573,25 +1573,25 @@
 # <think time> <used time>
 100 0
 # Actions
-6 10 1 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 172/192
 # <samurai id>
 2
 # <think time> <used time>
 100 0
 # Actions
-7 1 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 173/192
 # <samurai id>
 5
 # <think time> <used time>
 100 0
 # Actions
-8 1 9 0
+5 2 9 0
 # Comments
 ""
 # Turn 174/192
@@ -1600,7 +1600,7 @@
 # <think time> <used time>
 100 0
 # Actions
-0
+5 4 9 0
 # Comments
 ""
 # Turn 175/192
@@ -1609,25 +1609,25 @@
 # <think time> <used time>
 100 0
 # Actions
-10 3 9 0
+0
 # Comments
-"Hidden samurai tries to hide itself further"
+""
 # Turn 176/192
 # <samurai id>
 1
 # <think time> <used time>
 100 0
 # Actions
-2 9 7 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 177/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-10 5 4 0
+5 4 9 0
 # Comments
 ""
 # Turn 178/192
@@ -1636,7 +1636,7 @@
 # <think time> <used time>
 100 0
 # Actions
-5 10 1 0
+5 10 4 0
 # Comments
 ""
 # Turn 179/192
@@ -1647,14 +1647,14 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 180/192
 # <samurai id>
 0
 # <think time> <used time>
 100 0
 # Actions
-8 10 3 0
+0
 # Comments
 ""
 # Turn 181/192
@@ -1663,7 +1663,7 @@
 # <think time> <used time>
 100 0
 # Actions
-0
+8 10 4 0
 # Comments
 ""
 # Turn 182/192
@@ -1672,7 +1672,7 @@
 # <think time> <used time>
 100 0
 # Actions
-5 4 9 0
+5 10 4 0
 # Comments
 ""
 # Turn 183/192
@@ -1681,9 +1681,9 @@
 # <think time> <used time>
 100 0
 # Actions
-6 10 2 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 184/192
 # <samurai id>
 2
@@ -1692,14 +1692,14 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 185/192
 # <samurai id>
 5
 # <think time> <used time>
 100 0
 # Actions
-0
+5 2 9 0
 # Comments
 ""
 # Turn 186/192
@@ -1708,7 +1708,7 @@
 # <think time> <used time>
 100 0
 # Actions
-0
+7 4 9 0
 # Comments
 ""
 # Turn 187/192
@@ -1717,7 +1717,7 @@
 # <think time> <used time>
 100 0
 # Actions
-7 7 6 9 0
+0
 # Comments
 ""
 # Turn 188/192
@@ -1726,16 +1726,16 @@
 # <think time> <used time>
 100 0
 # Actions
-6 2 9 0
+0
 # Comments
-""
+"Hidden samurai tried occupation"
 # Turn 189/192
 # <samurai id>
 4
 # <think time> <used time>
 100 0
 # Actions
-8 10 4 0
+5 4 9 0
 # Comments
 ""
 # Turn 190/192
@@ -1744,7 +1744,7 @@
 # <think time> <used time>
 100 0
 # Actions
-0
+5 10 2 0
 # Comments
 ""
 # Turn 191/192
@@ -1755,4 +1755,4 @@
 # Actions
 0
 # Comments
-""
+"Hidden samurai tried occupation"
