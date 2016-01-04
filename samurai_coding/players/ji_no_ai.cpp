@@ -15,8 +15,8 @@ struct JinoAI: Player {
     {1, 2, 3, 4, 0, 0, 0},
     {1, 2, 0, 1, 0, 0, 0},
     {-1,0,1, 1, 1,-1, 0}};
-  const int dangerousCost = 20;
-  const int killCost = 40;
+  const int dangerousCost = 40;
+  const int killCost = 80;
 
   bool inField(int x,int y,GameInfo& info){
     if(x >= 0 && x < info.width && y >= 0 && y < info.height){
@@ -37,11 +37,19 @@ struct JinoAI: Player {
     for(int si=3;si<6;si++){
       int sx = info.samuraiInfo[si].curX;
       int sy = info.samuraiInfo[si].curY;
+      if(sx == -1 && sy == -1){
+        if(info.samuraiInfo[si].beforeX == -1 && info.samuraiInfo[si].beforeY == -1){
+          continue;
+        }else{
+          sx = info.samuraiInfo[si].beforeX;
+          sy = info.samuraiInfo[si].beforeY;
+        }
+      }
       for(int md = 0;md < 4;md++){
-        int nowX = sx + maskx[md];
-        int nowY = sy + masky[md];
+        int nowX = sx + nextx[md];
+        int nowY = sy + nexty[md];
         for(int wd = 0;wd < 4;wd++){
-          for(int i=0;i<8;i++){
+          for(int i=0;i<7;i++){
             int rx,ry;
             rotate(wd,weaponsAreaX[si-3][i],weaponsAreaY[si-3][i],rx,ry);
             int wx = nowX+rx;
