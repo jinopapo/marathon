@@ -21,6 +21,7 @@ struct SamuraiInfo {
   int homeX, homeY;
   int rank, score;
   int curX, curY;
+  int beforeX,beforeY;
   bool alive;
   int hidden;
   void homePosition(CommentedIStream& is);

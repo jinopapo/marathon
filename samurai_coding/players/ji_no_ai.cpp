@@ -56,6 +56,17 @@ struct JinoAI: Player {
     return 0;
   }
 
+  bool isHidden(SamuraiInfo samurai,GameInfo info,int wx,int wy){
+    if(samurai.alive) return false;
+    int x = samurai.beforeX;
+    int y = samurai.beforeY;
+    if(info.field[x+y*info.width] < 3) return false;
+    for(int i=0;i<4;i++){
+      if(wx == x+nextx[i] && wy == y+nexty[i]) return true;
+    }
+    if(wx == x && wy == y) return true;
+  }
+
   int attackArea(SamuraiInfo& me,GameInfo& info,int direction,int x,int y){
     int score=0;
     for(int i=0;i<7;i++){
@@ -71,8 +82,11 @@ struct JinoAI: Player {
         }
         for(int j=3;j<6;j++){
           SamuraiInfo samurai = info.samuraiInfo[j];
-          if(samurai.curX == wx && samurai.curY == wy){
+          if(samurai.curX == wx && samurai.curY == wy && (samurai.homeX != wx || samurai.homeY != wy)){
             score += killCost;
+          }
+          if(isHidden(samurai,info,wx,wy)){
+            score += killCost/2;
           }
         }
       }
@@ -96,6 +110,16 @@ struct JinoAI: Player {
           }
           if(f == 8){
             score++;
+          }
+          for(int j=0;j<6;j++){
+            SamuraiInfo samurai = info.samuraiInfo[j];
+            if(samurai.curX == mx && samurai.curY == my){
+              if(j < 3){
+                score -= 3;
+              }else{
+                score += 3;
+              }
+            }
           }
         }
       }

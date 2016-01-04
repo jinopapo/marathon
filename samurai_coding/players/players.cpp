@@ -43,6 +43,8 @@ void SamuraiInfo::readScoreInfo(CommentedIStream& is) {
 
 void SamuraiInfo::readTurnInfo(CommentedIStream& is) {
   int state;
+  beforeX = curX;
+  beforeY = curY;
   is >> curX >> curY >> state;
   alive = (state >= 0);
   hidden = (alive ? state : 0);
