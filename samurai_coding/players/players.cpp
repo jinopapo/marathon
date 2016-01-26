@@ -79,13 +79,13 @@ void GameInfo::readTurnInfo(CommentedIStream& is) {
   diff.clear();
   for (int y = 0; y != height; y++) {
     for (int x = 0; x != width; x++) {
-      if(turn > 5 && beforeField[x+y*width] != 9 && beforeField[x+y*width] < 3 &&  field[x+y*width] >= 3){
+      is >> field[y*width+x];
+      if(turn > 5 && beforeField[x+y*width] != field[x+y*width] &&  field[x+y*width] >= 3){
         tuple<int,int> t;
         get<0>(t) = x;
         get<1>(t) = y;
         diff.push_back(t);
       }
-      is >> field[y*width+x];
     }
   }
 }

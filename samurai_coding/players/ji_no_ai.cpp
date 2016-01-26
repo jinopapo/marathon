@@ -18,7 +18,7 @@ struct JinoAI: Player {
     {1, 2, 3, 4, 0, 0, 0},
     {1, 2, 0, 1, 0, 0, 0},
     {-1,0,1, 1, 1,-1, 0}};
-  const int dangerousCost = 40;
+  const int dangerousCost = 50;
   const int killCost = 80;
 
   bool inField(int x,int y,GameInfo& info){
@@ -40,35 +40,32 @@ struct JinoAI: Player {
     for(int si=3;si<6;si++){
       int sx = info.samuraiInfo[si].curX;
       int sy = info.samuraiInfo[si].curY;
-      for(int i=-5;i<=5;i++){
-        for(int j=-abs(5-i);j<=abs(5-i);j++){
-          if(isHidden(info.samuraiInfo[si],info,x+j,y+i,si)){
-            for(int md = 0;md < 4;md++){
-              int nowX = x+j + nextx[md];
-              int nowY = y+i + nexty[md];
-              for(int wd = 0;wd < 4;wd++){
-                for(int k=0;k<7;k++){
-                  int rx,ry;
-                  rotate(wd,weaponsAreaX[si-3][k],weaponsAreaY[si-3][k],rx,ry);
-                  int wx = nowX+rx;
-                  int wy = nowY+ry;
-                  if(x == wx && y == wy){
-                    return dangerousCost;
+      if(sx == -1 && sy == -1){
+        for(int i=-5;i<=5;i++){
+          for(int j=-abs(5-i);j<=abs(5-i);j++){
+            if(isHidden(info.samuraiInfo[si],info,x+j,y+i,si)){
+              for(int md = 0;md < 4;md++){
+                int nowX = x+j + nextx[md];
+                int nowY = y+i + nexty[md];
+                for(int wd = 0;wd < 4;wd++){
+                  for(int k=0;k<7;k++){
+                    int rx,ry;
+                    rotate(wd,weaponsAreaX[si-3][k],weaponsAreaY[si-3][k],rx,ry);
+                    int wx = nowX+rx;
+                    int wy = nowY+ry;
+                    if(x == wx && y == wy){
+                      return dangerousCost;
+                    }
                   }
                 }
               }
             }
           }
         }
+        sx = info.samuraiInfo[si].beforeX;
+        sy = info.samuraiInfo[si].beforeY;
       }
-      if(sx == -1 && sy == -1){
-        if(info.samuraiInfo[si].beforeX == -1 && info.samuraiInfo[si].beforeY == -1){
-          continue;
-        }else{
-          sx = info.samuraiInfo[si].beforeX;
-          sy = info.samuraiInfo[si].beforeY;
-        }
-      }
+      if(sx == -1 && sy == -1) continue;
       for(int md = 0;md < 4;md++){
         int nowX = sx + nextx[md];
         int nowY = sy + nexty[md];
@@ -102,7 +99,7 @@ struct JinoAI: Player {
         get<1>(t) = ey;
         if(inField(ex,ey,info) && info.field[ex+ey*info.width] < 3){
           flag = false;
-          continue;
+          break;
         }
         if(find(diff.begin(),diff.end(),t) != diff.end()){
           diff_flag = true;
@@ -182,7 +179,7 @@ struct JinoAI: Player {
         }
       }
     }
-    return score;
+    return score/2;
   }
 
   vector<int> attackAction(SamuraiInfo& me,GameInfo& info,int power){
