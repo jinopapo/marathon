@@ -1,4 +1,6 @@
 #include "players.hpp"
+#include <tuple>
+#include <vector>
 #include <random>
 
 struct JinoAI: Player {
@@ -37,6 +39,27 @@ struct JinoAI: Player {
     for(int si=3;si<6;si++){
       int sx = info.samuraiInfo[si].curX;
       int sy = info.samuraiInfo[si].curY;
+      for(int i=-5;i<=5;i++){
+        for(int j=-abs(5-i);j<=abs(5-i);j++){
+          if(isHidden(info.samuraiInfo[si],info,x+j,y+i,si)){
+            for(int md = 0;md < 4;md++){
+              int nowX = x+j + nextx[md];
+              int nowY = y+i + nexty[md];
+              for(int wd = 0;wd < 4;wd++){
+                for(int k=0;k<7;k++){
+                  int rx,ry;
+                  rotate(wd,weaponsAreaX[si-3][k],weaponsAreaY[si-3][k],rx,ry);
+                  int wx = nowX+rx;
+                  int wy = nowY+ry;
+                  if(x == wx && y == wy){
+                    return dangerousCost;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
       if(sx == -1 && sy == -1){
         if(info.samuraiInfo[si].beforeX == -1 && info.samuraiInfo[si].beforeY == -1){
           continue;
@@ -64,15 +87,49 @@ struct JinoAI: Player {
     return 0;
   }
 
-  bool isHidden(SamuraiInfo samurai,GameInfo info,int wx,int wy){
-    if(samurai.alive) return false;
+  bool isHidden(SamuraiInfo samurai,GameInfo info,int wx,int wy,int weapon){
+    //if(samurai.alive) return false;
     int x = samurai.beforeX;
     int y = samurai.beforeY;
-    if(info.field[x+y*info.width] < 3) return false;
-    for(int i=0;i<4;i++){
-      if(wx == x+nextx[i] && wy == y+nexty[i]) return true;
+    vector<tuple<int,int>> diff;
+    if(info.field[wx+wy*info.width] < 3) return false;
+    /*for(int i=0;i<info.width;i++){
+      for(int j=0;j<info.height;j++){
+        if(info.beforeField[i+j*info.width] != 9 && info.beforeField[i+j*info.width] < 3 &&  info.field[i+j*info.width] >= 3){
+          tuple<int,int> t;
+          get<0>(t) = i;
+          get<1>(t) = j;
+          diff.push_back(t);
+        }
+      }
+      }*/
+    for(int wd = 0;wd < 4;wd++){
+      bool flag =true;
+      for(int i=0;i<7;i++){
+        int rx,ry;
+        rotate(wd,weaponsAreaX[weapon-3][i],weaponsAreaY[weapon-3][i],rx,ry);
+        int ex = wx+rx;
+        int ey = wy+ry;
+        if(inField(ex,ey,info) && info.field[ex+ey*info.width] < 3) flag = false;
+      }
+      if(flag) return true;
     }
-    if(wx == x && wy == y) return true;
+    for(int i=0;i<4;i++){
+      for(int wd = 0;wd < 4;wd++){
+        bool flag =true;
+        for(int j=0;j<7;j++){
+          int rx,ry;
+          rotate(wd,weaponsAreaX[weapon-3][i],weaponsAreaY[weapon-3][i],rx,ry);
+          int ex = x+nextx[i]+rx;
+          int ey = y+nexty[i]+ry;
+          if(inField(ex,ey,info) && info.field[ex+ey*info.width] < 3) flag = false;
+        }
+        if(flag) return true;
+      }
+      //if(wx == x+nextx[i] && wy == y+nexty[i]) return true;
+    }
+    //if(wx == x && wy == y) return true;
+    return false;
   }
 
   int attackArea(SamuraiInfo& me,GameInfo& info,int direction,int x,int y){
@@ -93,8 +150,8 @@ struct JinoAI: Player {
           if(samurai.curX == wx && samurai.curY == wy && (samurai.homeX != wx || samurai.homeY != wy)){
             score += killCost;
           }
-          if(isHidden(samurai,info,wx,wy)){
-            score += killCost/2;
+          if(isHidden(samurai,info,wx,wy,j)){
+            score += killCost;
           }
         }
       }

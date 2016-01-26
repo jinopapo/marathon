@@ -73,6 +73,7 @@ void GameInfo::readTurnInfo(CommentedIStream& is) {
 		      << (s.hidden!=0 ? "*" : "");
   }
   if (logging) clog << endl;
+  beforeField = field;
   field = new int[width*height];
   for (int y = 0; y != height; y++) {
     for (int x = 0; x != width; x++) {

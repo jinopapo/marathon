@@ -64,6 +64,7 @@ struct GameInfo {
   // Turn information
   int turn, curePeriod;
   int* field;
+  int* beforeField;
   GameInfo(CommentedIStream& is);
   void readTurnInfo(CommentedIStream& is);
   bool isValid(int action) const;
