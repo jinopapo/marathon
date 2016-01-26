@@ -1,6 +1,7 @@
 #include "players.hpp"
 #include <unistd.h>
 #include <cstdlib>
+#include <tuple>
 
 bool logging = false;
 
@@ -75,8 +76,15 @@ void GameInfo::readTurnInfo(CommentedIStream& is) {
   if (logging) clog << endl;
   beforeField = field;
   field = new int[width*height];
+  diff.clear();
   for (int y = 0; y != height; y++) {
     for (int x = 0; x != width; x++) {
+      if(turn > 5 && beforeField[x+y*width] != 9 && beforeField[x+y*width] < 3 &&  field[x+y*width] >= 3){
+        tuple<int,int> t;
+        get<0>(t) = x;
+        get<1>(t) = y;
+        diff.push_back(t);
+      }
       is >> field[y*width+x];
     }
   }
