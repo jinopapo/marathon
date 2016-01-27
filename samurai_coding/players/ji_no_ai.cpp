@@ -215,9 +215,11 @@ struct JinoAI: Player {
       if(!isMove(me,info,nowx,nowy))continue;
       for(int j=0;j<4;j++){
         int attackScore = attackArea(me,info,j,nowx,nowy);
-        int change = attackScore + fearArea(me,info,i,nowx,nowy) - dangerousArea(info,nowx,nowy);
-        if(maxChange < change) action = i+5;
-        maxChange = max(maxChange,change);
+        if(dangerousArea(info,nowx,nowy) == 0){
+          int change = attackScore + fearArea(me,info,i,nowx,nowy);
+          if(maxChange < change) action = i+5;
+          maxChange = max(maxChange,change);
+        }
       }
     }
     return action;
