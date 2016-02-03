@@ -21,6 +21,7 @@ struct SamuraiInfo {
   int homeX, homeY;
   int rank, score;
   int curX, curY;
+  int beforeX,beforeY;
   bool alive;
   int hidden;
   void homePosition(CommentedIStream& is);
@@ -63,6 +64,7 @@ struct GameInfo {
   // Turn information
   int turn, curePeriod;
   int* field;
+  int* beforeField;
   GameInfo(CommentedIStream& is);
   void readTurnInfo(CommentedIStream& is);
   bool isValid(int action) const;

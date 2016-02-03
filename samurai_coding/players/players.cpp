@@ -43,6 +43,8 @@ void SamuraiInfo::readScoreInfo(CommentedIStream& is) {
 
 void SamuraiInfo::readTurnInfo(CommentedIStream& is) {
   int state;
+  beforeX = curX;
+  beforeY = curY;
   is >> curX >> curY >> state;
   alive = (state >= 0);
   hidden = (alive ? state : 0);
@@ -71,6 +73,7 @@ void GameInfo::readTurnInfo(CommentedIStream& is) {
 		      << (s.hidden!=0 ? "*" : "");
   }
   if (logging) clog << endl;
+  beforeField = field;
   field = new int[width*height];
   for (int y = 0; y != height; y++) {
     for (int x = 0; x != width; x++) {
