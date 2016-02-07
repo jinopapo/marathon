@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstring>
 #include <list>
+#include <vector>
+#include <tuple>
 
 using namespace std;
 
@@ -65,6 +67,7 @@ struct GameInfo {
   int turn, curePeriod;
   int* field;
   int* beforeField;
+  vector<tuple<int,int>> diff;
   GameInfo(CommentedIStream& is);
   void readTurnInfo(CommentedIStream& is);
   bool isValid(int action) const;
