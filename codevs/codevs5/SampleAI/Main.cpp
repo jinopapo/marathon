@@ -80,17 +80,29 @@ MinDist getMinDist(const State &st, int sx, int sy) {
   return minDist;
 }
 
-/*
- * 引数
- * - id: 忍者ID
- * - dir: 忍者を歩かせる方向
- *
- * ID が id である忍者を dir の方向へ移動するシミュレートを行います。
- * この関数で行われるシミュレート内容
- * - 忍者の位置修正 (移動先が岩の場合は、位置修正を行わずにシミュレートを終了します)
- * - 移動先にニンジャソウルが存在する場合、取得処理(忍力回復する, フィールドのソウルフラグをfalseにする, 取得済みのソウルの座標削除)が行われます。
- * (※簡単なシミュレートのため、壁を押すなどの処理は行われません)
- */
+int nearSoul(State &st,int sx,int sy){
+  Point p;
+  queue<Search> bfs;
+  vector< vector<bool> > closed(st.H, vector<bool>(st.W, false));
+  closed[sy][sx] = true;
+  bfs.push(Search(sx, sy, 0));
+  while (!bfs.empty()) {
+    Search sc = bfs.front(); bfs.pop();
+    for (int dir = 0; dir < 4; dir++) {
+      int nx = sc.x + dx[dir];
+      int ny = sc.y + dy[dir];
+      if(st.field[sc.y][sc.x].containsSoul) return sc.dist;
+
+      if (!st.field[ny][nx].isEmpty()) continue;
+      if (closed[ny][nx]) continue;
+
+      closed[ny][nx] = true;
+      bfs.push(Search(nx, ny, sc.dist + 1));
+    }
+  }
+  return 100;
+}
+
 void simulateWalk(int id, int dir,State &st) {
   int nx = st.ninjas[id].x + dx[dir];
   int ny = st.ninjas[id].y + dy[dir];
@@ -110,17 +122,9 @@ void simulateWalk(int id, int dir,State &st) {
   st.field[st.ninjas[id].y][st.ninjas[id].x].kind = CELL_EMPTY;
 
   // 取得済みのソウルの座標削除
-  //st.souls.erase( find(myState.souls.begin(), myState.souls.end(), Point(nx, ny)) );
+  st.souls.erase( find(st.souls.begin(), st.souls.end(), Point(nx, ny)) );
 }
 
-/*
- * 移動方向の決め方
- * - 忍者は、自分自身から最も近いニンジャソウルへ向かって移動します。
- * - 壁を押さずに移動します。
- * - 忍犬までの最短距離が1以下になるようなマスへは移動しません。
- * - 自分自身のマスから連結であるマスの中にニンジャソウルが存在しない場合は、忍犬までの最短距離が最大になるように移動します。
- * -- 忍犬も存在しない場合は、その場にとどまります。
- */
 void thinkByNinjaId(int id,int playCount) {
   vector<string> dirs;
   int maxFree=0;
@@ -133,7 +137,6 @@ void thinkByNinjaId(int id,int playCount) {
   nState.nearDogs = false;
   dfs.push(nState);
 
-  //このターン全探索
   while(!dfs.empty()){
     nState = dfs.top();
     dfs.pop();
@@ -171,32 +174,40 @@ void thinkByNinjaId(int id,int playCount) {
 
   if(nexts.size() != 0){
     int maxSoul = 0;
+    int minDist = 100;
     vector<nextState> nss;
+    vector<nextState> soulDists;
     for(auto ns:nexts){
       if(maxSoul <= ns.state.skillPoint){
+        if(maxSoul < ns.state.skillPoint){
+          nss.clear();
+          maxSoul = ns.state.skillPoint;
+        }
         nss.push_back(ns);
-        maxSoul = ns.state.skillPoint;
       }
     }
-    nState = nss[rand()%nss.size()];
+    for (auto ns:nss){
+      int nx = ns.state.ninjas[id].x;
+      int ny = ns.state.ninjas[id].y;
+      int dist = nearSoul(ns.state,nx,ny);
+      if(minDist >= dist){
+        if(minDist > dist){
+          soulDists.clear();
+          minDist = dist;
+        }
+        soulDists.push_back(ns);
+      }
+    }
+    nState = soulDists[rand()%soulDists.size()];
     myState = nState.state;
     for(string s:nState.dir) cout << s;
   }
 }
 
-/*
- * このAIについて
- * - 各忍者について、 thinkByNinja(id) を2回行います。
- * - thinkByNinja(id) は、一人の忍者の一歩の行動を決める関数です(詳しくは関数のコメントを参照)。
- *
- * - 忍術
- * -- 「超高速」のみを使用します。
- * -- 「超高速」を使えるだけの忍力を所持している場合に自動的に使用して、thinkByNinja(id) を1回多く呼び出します。
- */
 void think() {
   int moveLoop = 2;
 
-  if (myState.skillPoint >= skills[0].cost) {
+  if (myState.skillPoint >= skills[0].cost && rand() % 5){
     cout << 3 << endl;
     cout << skills[0].id << endl;
     moveLoop = 3;
