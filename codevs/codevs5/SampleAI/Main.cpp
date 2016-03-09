@@ -5,6 +5,7 @@
 #include <climits>
 #include <stack>
 #include "Status.h"
+#include "skill.h"
 
 using namespace std;
 
@@ -168,7 +169,6 @@ void thinkByNinjaId(int id,int playCount) {
           }
         }
       }
-      cerr << endl;
     }
   }
 
@@ -207,14 +207,10 @@ void thinkByNinjaId(int id,int playCount) {
 void think() {
   int moveLoop = 2;
 
-  if (myState.skillPoint >= skills[0].cost && rand() % 5){
-    cout << 3 << endl;
-    cout << skills[0].id << endl;
+  int id = thinkSkil(myState,rivalState,skills);
+  if(id == 0){
     moveLoop = 3;
-  } else {
-    cout << 2 << endl;
   }
-
   for (int i = 0; i < (int)myState.ninjas.size(); i++) {
     thinkByNinjaId(myState.ninjas[i].id,moveLoop);
     cout << endl;
