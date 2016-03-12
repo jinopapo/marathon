@@ -110,6 +110,8 @@ public:
       Character ninja = Character::input();
       st.ninjas.push_back(ninja);
       st.field[ninja.y][ninja.x].containsNinja = true;
+
+
     }
 
     int numOfDogs;

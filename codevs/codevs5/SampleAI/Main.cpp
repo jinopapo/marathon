@@ -25,6 +25,7 @@ bool isMoveStone(const State &st,int sx,int sy,int dir){
   return !st.field[ny][nx].isObj();
 }
 
+
 void SearchNear(nextState &st,int sx,int sy){
   st.nearDogs = false;
   st.free = 0;
@@ -81,27 +82,34 @@ MinDist getMinDist(const State &st, int sx, int sy) {
   return minDist;
 }
 
-int nearSoul(State &st,int sx,int sy){
-  Point p;
-  queue<Search> bfs;
-  vector< vector<bool> > closed(st.H, vector<bool>(st.W, false));
-  closed[sy][sx] = true;
-  bfs.push(Search(sx, sy, 0));
-  while (!bfs.empty()) {
-    Search sc = bfs.front(); bfs.pop();
-    for (int dir = 0; dir < 4; dir++) {
-      int nx = sc.x + dx[dir];
-      int ny = sc.y + dy[dir];
-      if(st.field[sc.y][sc.x].containsSoul) return sc.dist;
-
-      if (!st.field[ny][nx].isEmpty()) continue;
-      if (closed[ny][nx]) continue;
-
-      closed[ny][nx] = true;
-      bfs.push(Search(nx, ny, sc.dist + 1));
+int farFree(State st,int sx,int sy){
+  int meanFree = 0;
+  for(int monte = 0;monte <100;monte++){
+    int doneMap[17][14] = {{false}};
+    int nx = sx;
+    int ny = sy;
+    int free = 0;
+    for(int depth = 0;depth<20;depth++){
+      vector<int> next;
+      doneMap[ny][nx] = true;
+      for(int dir = 0;dir<4;dir++){
+        Cell cell = st.field[ny+dy[dir]][nx+dx[dir]];
+        if(doneMap[ny+dy[dir]][nx+dx[dir]] || cell.isWall()) continue;
+        if(!cell.containsDog && (cell.isEmpty() || isMoveStone(st,nx+dx[dir],ny+dy[dir],dir))){
+          next.push_back(dir);
+          free++;
+        }
+      }
+      if(next.size()){
+        int nextDir = next[rand()%next.size()];
+        nx = nx+dx[nextDir];
+        ny = ny+dy[nextDir];
+      }
     }
+    meanFree+=free;
   }
-  return 100;
+  meanFree /= 100;
+  return meanFree;
 }
 
 void simulateWalk(int id, int dir,State &st) {
@@ -112,23 +120,61 @@ void simulateWalk(int id, int dir,State &st) {
   st.ninjas[id].x = nx;
   st.ninjas[id].y = ny;
 
-  if (!st.field[ny][nx].containsSoul) return;
+  if (st.field[ny][nx].containsSoul){
+    st.skillPoint += 2;
+    st.field[ny][nx].containsSoul = false;
+    st.souls.erase( find(st.souls.begin(), st.souls.end(), Point(nx, ny)) );
+  }
 
-  // 忍力回復
-  st.skillPoint += 2;
+  if(st.field[ny][nx].isObject() && isMoveStone(st,nx,ny,dir)){
+    st.field[st.ninjas[id].y][st.ninjas[id].x].kind = CELL_EMPTY;
+    st.field[st.ninjas[id].y+dy[dir]][st.ninjas[id].x+dx[dir]].kind = CELL_OBJECT;
+  }
+}
 
-  // フィールドのフラグをfalseに
-  st.field[ny][nx].containsSoul = false;
-  st.field[ny][nx].kind = CELL_OBJECT;
-  st.field[st.ninjas[id].y][st.ninjas[id].x].kind = CELL_EMPTY;
+int nearSoul(State &st,int id,int sx,int sy){
+  struct bfsState{
+    State st;
+    int dist;
+    bool done[17][14];
+  };
+  Point p;
+  queue<bfsState> bfs;
+  bfsState bst;
+  for(int iy=0;iy<17;iy++)for(int ix=0;ix<14;ix++) bst.done[iy][ix] = false;
+  bst.st = st;
+  bst.done[sy][sx] = true;
+  bst.dist = 0;
+  bfs.push(bst);
+  while (!bfs.empty()) {
+    for (int dir = 0; dir < 4; dir++) {
+      bfsState bs = bfs.front();
+      int nx = bs.st.ninjas[id].x + dx[dir];
+      int ny = bs.st.ninjas[id].y + dy[dir];
+      if(bs.st.field[ny][nx].isWall()) continue;
+      if(!bs.st.field[ny][nx].isEmpty() && !isMoveStone(bs.st,nx+dx[dir],ny+dy[dir],dir)) continue;
+      simulateWalk(id,dir,bs.st);
+      if(bs.st.field[ny][nx].containsSoul){
+        st.field[ny][nx].containsSoul = false;
+        st.souls.erase( find(st.souls.begin(), st.souls.end(), Point(nx, ny)) );
+        return bs.dist;
+      }
 
-  // 取得済みのソウルの座標削除
-  st.souls.erase( find(st.souls.begin(), st.souls.end(), Point(nx, ny)) );
+      if (!bs.st.field[ny][nx].isEmpty() || bs.st.field[ny][nx].containsDog) continue;
+      if (bs.done[ny][nx]) continue;
+
+      bs.done[ny][nx] = true;
+      bs.dist++;
+      if(bs.dist < 10)
+        bfs.push(bs);
+    }
+    bfs.pop();
+  }
+  return 100;
 }
 
 void thinkByNinjaId(int id,int playCount) {
   vector<string> dirs;
-  int maxFree=0;
   vector<int> freeDir;
   stack<nextState> dfs;
   vector<nextState> nexts;
@@ -141,19 +187,13 @@ void thinkByNinjaId(int id,int playCount) {
   while(!dfs.empty()){
     nState = dfs.top();
     dfs.pop();
-    if(maxFree <= nState.free){
-      bool contain = false;
-      for(nextState ns:nexts){
-        if(ns.dir == nState.dir)
-          contain = true;
-      }
-      if(!contain && !nState.nearDogs){
-        if(maxFree < nState.free && maxFree < 3){
-          maxFree = min(nState.free,3);
-          nexts.clear();
-        }
-        nexts.push_back(nState);
-      }
+    bool contain = false;
+    for(nextState ns:nexts){
+      if(ns.dir == nState.dir)
+        contain = true;
+    }
+    if(!contain && !nState.nearDogs && nState.dir.size()){
+      nexts.push_back(nState);
     }
     if((int)nState.dir.size() != playCount){
       for(int dir=0;dir<4;dir++){
@@ -186,10 +226,18 @@ void thinkByNinjaId(int id,int playCount) {
         nss.push_back(ns);
       }
     }
-    for (auto ns:nss){
+    vector<nextState> monte;
+    /*for (auto ns:nss){
       int nx = ns.state.ninjas[id].x;
       int ny = ns.state.ninjas[id].y;
-      int dist = nearSoul(ns.state,nx,ny);
+      int free = farFree(ns.state,nx,ny);
+      if(free >= 20) monte.push_back(ns);
+      }*/
+    if(!monte.size()) monte = nss;
+    for (auto ns:monte){
+      int nx = ns.state.ninjas[id].x;
+      int ny = ns.state.ninjas[id].y;
+      int dist = nearSoul(ns.state,id,nx,ny);
       if(minDist >= dist){
         if(minDist > dist){
           soulDists.clear();
@@ -198,6 +246,7 @@ void thinkByNinjaId(int id,int playCount) {
         soulDists.push_back(ns);
       }
     }
+    if(!soulDists.size()) soulDists = monte;
     nState = soulDists[rand()%soulDists.size()];
     myState = nState.state;
     for(string s:nState.dir) cout << s;

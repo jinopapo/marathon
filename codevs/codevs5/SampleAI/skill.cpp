@@ -68,7 +68,7 @@ void WanwanWarp(State st){
 
 int thinkSkil(State myState,State rivalState,vector<Skill>skills){
   int id = rand()%8;
-  if(myState.skillPoint >= skills[id].cost){
+  if(myState.skillPoint >= skills[id].cost && id != 6 && id == -1){
     cout << 3 << endl;
     switch(id){
     case 0:
@@ -84,7 +84,6 @@ int thinkSkil(State myState,State rivalState,vector<Skill>skills){
       ThunderMe(myState);
       break;
     case 4:
-      ThunderRival(rivalState);
       break;
     case 5:
       DummyMe(myState);
@@ -96,6 +95,7 @@ int thinkSkil(State myState,State rivalState,vector<Skill>skills){
       WanwanWarp(myState);
       break;
     }
+
     return id;
   }else{
     cout << 2 << endl;
