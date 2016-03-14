@@ -1,4 +1,4 @@
-all: AI JINOPAPOAI
+all: JINOPAPOAI
 
 CXX = g++
 

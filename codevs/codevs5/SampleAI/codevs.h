@@ -59,6 +59,10 @@ public:
   Character() { id = -1; }
   Character(int id, int x, int y): id(id), Point(x, y) {}
 
+  bool operator==( const Character& r ) const {
+    return x == r.x && y == r.y;
+  }
+
   static Character input() {
     int id, x, y;
     cin >> id >> y >> x;

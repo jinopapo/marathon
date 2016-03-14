@@ -1,5 +1,6 @@
-#include "Status.h"
 #include "skill.h"
+#include "state.h"
+#include "codevs.h"
 
 void StoneMe(State st){
   int x = rand()%14;
@@ -11,20 +12,21 @@ void StoneMe(State st){
   cout << 1 << " " << y << " " << x << endl;
 }
 
-void StoneRival(State st){
+void StoneRival(State &st){
   int x = rand()%14;
   int y = rand()%17;
-  while (st.field[y][x].isObj()) {
+  while (st.field[y][x].isStone()) {
     x = rand()%14;
     y = rand()%17;
   }
+  st.field[y][x].Empty();
   cout << 2 << " " << y << " " << x << endl;
 }
 
 void ThunderMe(State st){
   int x = rand()%14;
   int y = rand()%17;
-  while (!st.field[y][x].isObject()) {
+  while (!st.field[y][x].isStone()) {
     x = rand()%14;
     y = rand()%17;
   }
@@ -34,7 +36,7 @@ void ThunderMe(State st){
 void ThunderRival(State st){
   int x = rand()%14;
   int y = rand()%17;
-  while (!st.field[y][x].isObject()) {
+  while (!st.field[y][x].isStone()) {
     x = rand()%14;
     y = rand()%17;
   }
@@ -62,40 +64,33 @@ void DummyRival(State st){
 }
 
 void WanwanWarp(State st){
+  cout << 3 << endl;
   int id = rand()%2;
   cout << 7 << " " << id << endl;
 }
 
-int thinkSkil(State myState,State rivalState,vector<Skill>skills){
+int thinkSkil(State &myState,State rivalState,vector<Skill>skills){
   int id = rand()%8;
-  if(myState.skillPoint >= skills[id].cost && id != 6 && id == -1){
-    cout << 3 << endl;
+  if(myState.skillPoint >= skills[id].cost){
     switch(id){
-    case 0:
-      cout << 0 << endl;
-      break;
-    case 1:
-      StoneMe(myState);
-      break;
     case 2:
+      cout << 3 << endl;
       StoneRival(rivalState);
       break;
     case 3:
+      cout << 3 << endl;
       ThunderMe(myState);
       break;
-    case 4:
-      break;
     case 5:
+      cout << 3 << endl;
       DummyMe(myState);
-      break;
-    case 6:
-      DummyRival(rivalState);
       break;
     case 7:
       WanwanWarp(myState);
       break;
+    default:
+      cout << 2 << endl;
     }
-
     return id;
   }else{
     cout << 2 << endl;

@@ -15,7 +15,9 @@ public:
   vector<Character> ninjas;
   vector<Character> dogs;
   vector<Point> souls;
+  vector<int> ninjasSouls[2];
   vector<int> skillCount;
+  vector<int> getSouls;
 
   State() {
     skillPoint = H = W = -1;
@@ -26,8 +28,13 @@ public:
     skillCount.clear();
   }
 
+  bool operator==( const State& r ) const {
+    return  ninjas[0] == r.ninjas[0] && ninjas[1] == r.ninjas[1];
+  }
+
   bool isMove(int x,int y,int dir);
   int searchNearDogs();
+  int searchNearFree(int sid);
   void simulateWalk(int dir);
   void searchDistDog(int minMap[17][14],int sid);
   void dogSimulate();
