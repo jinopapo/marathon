@@ -21,6 +21,35 @@ bool State::isMove(int x,int y,int dir){
   else return false;
 }
 
+bool State::isClose(){
+  queue<Search> bfs;
+  for(int i=0;i<2;i++){
+    id = i;
+    int maxDist = 0;
+    bool done[17][14] = {{false}};
+    int nx = ninjas[i].x;
+    int ny = ninjas[i].y;
+    bfs.push(Search(nx,ny,0));
+    while(!bfs.empty()){
+      Search sc = bfs.front();
+      if(maxDist < sc.dist) maxDist = sc.dist;
+      bfs.pop();
+      if(sc.dist >= 10) continue;
+      for(int dir=0;dir<4;dir++){
+        nx = sc.x + dx[dir];
+        ny = sc.y + dy[dir];
+        if(field[ny][nx].containsDog) continue;
+        if(!isMove(nx,ny,dir)) continue;
+        if(done[ny][nx]) continue;
+        done[ny][nx] = true;
+        bfs.push(Search(nx, ny, sc.dist+1));
+      }
+    }
+    if(maxDist < 10) return true;
+  }
+  return false;
+}
+
 int State::searchNearDogs(){
   int count = 0;
   for(int dir=0;dir<4;dir++){
@@ -119,17 +148,21 @@ void State::dogSimulate(){
   sort(next.begin(),next.end());
   dogs.clear();
   for(auto dog:next){
-    bool flag = false;
+    int minDir = -1;
+    int minDist = INF;
     for(int dir=0;dir<4;dir++){
       int ny = dog.dog.y+ddy[dir];
       int nx = dog.dog.x+ddx[dir];
-      if(minMap[dog.dog.y][dog.dog.x] > minMap[ny][nx] && !field[ny][nx].containsDog && !flag){
-        field[ny][nx].containsDog = true;
-        field[dog.dog.y][dog.dog.x].containsDog = false;
-        dog.dog.x = nx;
-        dog.dog.y = ny;
-        flag = true;
+      if(field[ny][nx].containsDog)continue;
+      if(minDist > minMap[ny][nx]){
+        minDist = minMap[ny][nx];
       }
+    }
+    if(minDir != -1){
+      field[dog.dog.y+ddy[minDir]][dog.dog.x+ddx[minDir]].containsDog = true;
+      field[dog.dog.y][dog.dog.x].containsDog = false;
+      dog.dog.x += ddx[minDir];
+      dog.dog.y += ddy[minDir];
     }
     dogs.push_back(dog.dog);
   }

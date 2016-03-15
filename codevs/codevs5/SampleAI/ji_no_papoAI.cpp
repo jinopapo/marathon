@@ -7,7 +7,7 @@
 
 using namespace std;
 
-//const int INF = 876765346;
+const int INF = 876765346;
 
 int remTime;
 vector<Skill> skills;
@@ -112,7 +112,7 @@ void searchSoulDist(int soulDist[8][17][14]){
       for(int dir=0;dir<4;dir++){
         nx = sc.x + dx[dir];
         ny = sc.y + dy[dir];
-        if(!myState.field[ny][nx].isEmpty() /*||  myState.field[ny][nx].containsDog*/) continue;
+        if(!myState.field[ny][nx].isEmpty()) continue;
         if(soulDist[i][ny][nx] < sc.dist) continue;
         soulDist[i][ny][nx] = sc.dist+1;
         bfs.push(Search(nx, ny, sc.dist+1));
@@ -122,46 +122,38 @@ void searchSoulDist(int soulDist[8][17][14]){
 }
 
 
-void think(){
-  thinkSkil(myState,rivalState,skills);
+vector<State> bfsNext(State now,int range=INF){
   queue<State> bfs;
+  int done[17][14];
   vector<State> next;
-  int soulDist[8][17][14];
-  int INF = 876765346;
-  for(int i=0;i<8;i++)for(int y=0;y<17;y++)for(int x=0;x<14;x++) soulDist[i][y][x] = INF;
-  searchSoulDist(soulDist);
-  bfs.push(myState);
-  if(!myState.searchNearDogs()){
-    myState.id=1;
-    bfs.push(myState);
+  for(int y=0;y<17;y++)for(int x=0;x<14;x++) done[y][x] = -1;
+  bfs.push(now);
+  if(!now.searchNearDogs()){
+    now.id=1;
+    bfs.push(now);
   }
   while(!bfs.empty()){
     State st = bfs.front();
     bfs.pop();
     int nx = st.ninjas[st.id].x;
     int ny = st.ninjas[st.id].y;
-    if(st.id == 1 && !st.searchNearDogs() && !st.field[ny][nx].containsDog){
+    if(st.id == 1 && !st.searchNearDogs()){
       auto iter = find(next.begin(),next.end(),st);
-      int ind = iter - next.begin();
-      if(iter != next.end() &&st.skillPoint > next[ind].skillPoint){
-        next.erase(iter);
-      }
-      if(iter == next.end()){
+      if(iter == next.end() || next[iter-next.begin()].skillPoint < st.skillPoint){
+        while(iter != next.end()){
+          next.erase(iter);
+          iter = find(next.begin(),next.end(),st);
+        }
+        done[ny][nx] = st.skillPoint;
         State ist = st;
         ist.dogSimulate();
-        for(int i=0;i<8;i++){
-          auto iter = find(ist.getSouls.begin(),ist.getSouls.end(),i);
-          if(iter != ist.getSouls.end()) continue;
-          int x0 = ist.ninjas[0].x;
-          int y0 = ist.ninjas[0].y;
-          int x1 = ist.ninjas[1].x;
-          int y1 = ist.ninjas[1].y;
-          if(soulDist[i][y0][x0] < soulDist[i][y1][x1])
-            ist.ninjasSouls[0].push_back(i);
-          else
-            ist.ninjasSouls[1].push_back(i);
-        }
+        ist.id = 0;
         next.push_back(ist);
+        if(range <= (int)next.size()){
+          queue<State> q;
+          swap(bfs,q);
+          continue;
+        }
       }
     }
     if(st.ninjas[st.id].dir.size() < 2){
@@ -169,35 +161,72 @@ void think(){
         nx = st.ninjas[st.id].x + dx[dir];
         ny = st.ninjas[st.id].y + dy[dir];
         State ist = st;
-        if(ist.field[ny][nx].isWall()) continue;
         if(!ist.isMove(nx,ny,dir)) continue;
         if(ist.field[ny][nx].containsDog) continue;
         ist.simulateWalk(dir);
-        int dogs = ist.searchNearDogs();
+        if(ist.id == 0 && done[ny][nx] > ist.skillPoint) continue;
         ist.ninjas[ist.id].dir.push_back(ds[dir]);
         if(ist.ninjas[ist.id].dir.size() <= 2)
           bfs.push(ist);
-        if(ist.id == 0 && !dogs){
+        if(ist.id == 0){
+          if(done[ny][nx] == ist.skillPoint) continue;
+          if(ist.searchNearDogs()) continue;
           ist.id = 1;
           bfs.push(ist);
         }
+        done[ny][nx] = ist.skillPoint;
       }
     }
   }
+  return next;
+}
+
+vector<State> nextAlive(vector<State> states){
   vector<State> tmp;
-  for(State st:next){
+  for(State st:states){
     bool flag = true;
     for(int i=0;i<2;i++){
-      int free = st.searchNearFree(i);
-      if(!free) flag = false;
+      /*bool dead = true;
+      bool done[17][14] = {{false}};
+      queue<State> bfs;
+      bfs.push(st);
+      st.id = i;
+      while(!bfs.empty()){
+        State next = bfs.front();
+        bfs.pop();
+        if(!next.searchNearDogs()){
+          queue<State> q;
+          swap(bfs,q);
+          dead = false;
+          continue;
+        }
+        for(int dir=0;dir<4;dir++){
+          int nx = st.ninjas[st.id].x + dx[dir];
+          int ny = st.ninjas[st.id].y + dy[dir];
+          State ist = st;
+          if(done[ny][nx]) continue;
+          done[ny][nx] = true;
+          if(!ist.isMove(nx,ny,dir)) continue;
+          if(ist.field[ny][nx].containsDog) continue;
+          ist.simulateWalk(dir);
+          if(ist.ninjas[ist.id].dir.size() <= 2)
+            bfs.push(ist);
+        }
+      }
+      if(dead) flag = false;*/
       if(!st.ninjas[i].dir.size()) flag = false;
     }
+    //if(flag && st.isClose()) flag = false;
     if(flag)tmp.push_back(st);
   }
-  if(tmp.size())next=tmp;
-  tmp.clear();
+  if(tmp.size()) return tmp;
+  else return states;
+}
+
+vector<State> getSouls(vector<State> states){
+  vector<State> tmp;
   int maxSoul = 0;
-  for(State st:next){
+  for(State st:states){
     if(maxSoul < st.skillPoint){
       maxSoul = st.skillPoint;
       tmp.clear();
@@ -206,16 +235,51 @@ void think(){
       tmp.push_back(st);
     }
   }
-  if(tmp.size())next=tmp;
-  tmp.clear();
+  if(tmp.size()) return tmp;
+  else return states;
+}
+
+vector<State> nextPattern(vector<State> states){
+  vector<State> tmp;
+  for(State st:states){
+    vector<State> v = bfsNext(st,10);
+    if(v.size() >= 10) tmp.push_back(st);
+  }
+  cerr << tmp.size() << endl;
+  if(tmp.size()) return tmp;
+  else return states;
+}
+
+vector<State> nearestSouls(vector<State> states){
+  int INF = 876765346;
+  vector<State> tmp;
   int minDist = INF*2;
-  for(State st:next){
+  int soulDist[8][17][14];
+  for(int i=0;i<8;i++)for(int y=0;y<17;y++)for(int x=0;x<14;x++) soulDist[i][y][x] = INF;
+  searchSoulDist(soulDist);
+  for(State st:states){
     int dist=0;
+    for(int i=0;i<8;i++){
+      auto iter = find(st.getSouls.begin(),st.getSouls.end(),i);
+      if(iter != st.getSouls.end()) continue;
+      int x0 = st.ninjas[0].x;
+      int y0 = st.ninjas[0].y;
+      int x1 = st.ninjas[1].x;
+      int y1 = st.ninjas[1].y;
+      if(soulDist[i][y0][x0] < soulDist[i][y1][x1])
+        st.ninjasSouls[0].push_back(i);
+      else
+        st.ninjasSouls[1].push_back(i);
+    }
     for(int i=0;i<2;i++){
       int d=INF;
       for(int ind:st.ninjasSouls[i]){
-        if(d > soulDist[ind][st.ninjas[i].y][st.ninjas[i].x])
-          d = soulDist[ind][st.ninjas[i].y][st.ninjas[i].x];
+        int nx = st.ninjas[i].x;
+        int ny = st.ninjas[i].y;
+        int sx = myState.ninjas[i].x;
+        int sy = myState.ninjas[i].y;
+        if(d > soulDist[ind][ny][nx] && soulDist[ind][ny][nx] <= soulDist[ind][sy][sx])
+          d = soulDist[ind][ny][nx];
       }
       dist += d;
     }
@@ -227,8 +291,19 @@ void think(){
       tmp.push_back(st);
     }
   }
-  cerr << next.size() << endl;
-  if(tmp.size())next=tmp;
+  if(tmp.size()) return tmp;
+  else return states;
+}
+
+void think(){
+  thinkSkil(myState,rivalState,skills);
+  //cout << 2 << endl;
+  vector<State> next;
+  next = bfsNext(myState);
+  next = nextAlive(next);
+  next = nextPattern(next);
+  next = getSouls(next);
+  next = nearestSouls(next);
   if(next.size()){
     State st = next[rand()%next.size()];
     for(int i=0;i<2;i++){

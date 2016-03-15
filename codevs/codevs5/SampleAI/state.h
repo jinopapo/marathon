@@ -33,6 +33,7 @@ public:
   }
 
   bool isMove(int x,int y,int dir);
+  bool isClose();
   int searchNearDogs();
   int searchNearFree(int sid);
   void simulateWalk(int dir);
