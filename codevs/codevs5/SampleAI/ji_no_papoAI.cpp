@@ -126,6 +126,10 @@ vector<State> bfsNext(State now,int range=INF){
   queue<State> bfs;
   int done[17][14];
   vector<State> next;
+  now.id = 0;
+  for(int i=0;i<2;i++){
+    now.ninjas[i].dir.clear();
+  }
   for(int y=0;y<17;y++)for(int x=0;x<14;x++) done[y][x] = -1;
   bfs.push(now);
   if(!now.searchNearDogs()){
@@ -147,7 +151,6 @@ vector<State> bfsNext(State now,int range=INF){
         done[ny][nx] = st.skillPoint;
         State ist = st;
         ist.dogSimulate();
-        ist.id = 0;
         next.push_back(ist);
         if(range <= (int)next.size()){
           queue<State> q;
@@ -301,7 +304,7 @@ void think(){
   vector<State> next;
   next = bfsNext(myState);
   next = nextAlive(next);
-  next = nextPattern(next);
+  //next = nextPattern(next);
   next = getSouls(next);
   next = nearestSouls(next);
   if(next.size()){
