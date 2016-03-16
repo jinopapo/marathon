@@ -189,11 +189,11 @@ vector<State> nextAlive(vector<State> states){
   for(State st:states){
     bool flag = true;
     for(int i=0;i<2;i++){
-      /*bool dead = true;
+      bool dead = true;
       bool done[17][14] = {{false}};
       queue<State> bfs;
-      bfs.push(st);
       st.id = i;
+      bfs.push(st);
       while(!bfs.empty()){
         State next = bfs.front();
         bfs.pop();
@@ -216,10 +216,10 @@ vector<State> nextAlive(vector<State> states){
             bfs.push(ist);
         }
       }
-      if(dead) flag = false;*/
+      if(dead) flag = false;
       if(!st.ninjas[i].dir.size()) flag = false;
     }
-    //if(flag && st.isClose()) flag = false;
+    if(flag && st.isClose()) flag = false;
     if(flag)tmp.push_back(st);
   }
   if(tmp.size()) return tmp;
@@ -244,11 +244,12 @@ vector<State> getSouls(vector<State> states){
 
 vector<State> nextPattern(vector<State> states){
   vector<State> tmp;
-  for(State st:states){
-    vector<State> v = bfsNext(st,10);
+  if(states.size() < 10){
+    for(State st:states){
+      vector<State> v = bfsNext(st,10);
     if(v.size() >= 10) tmp.push_back(st);
+    }
   }
-  cerr << tmp.size() << endl;
   if(tmp.size()) return tmp;
   else return states;
 }
@@ -299,12 +300,12 @@ vector<State> nearestSouls(vector<State> states){
 }
 
 void think(){
-  thinkSkil(myState,rivalState,skills);
-  //cout << 2 << endl;
+  //thinkSkil(myState,rivalState,skills);
+  cout << 2 << endl;
   vector<State> next;
   next = bfsNext(myState);
   next = nextAlive(next);
-  //next = nextPattern(next);
+  next = nextPattern(next);
   next = getSouls(next);
   next = nearestSouls(next);
   if(next.size()){

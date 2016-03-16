@@ -156,6 +156,7 @@ void State::dogSimulate(){
       if(field[ny][nx].containsDog)continue;
       if(minDist > minMap[ny][nx]){
         minDist = minMap[ny][nx];
+        minDir = dir;
       }
     }
     if(minDir != -1){
