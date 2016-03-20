@@ -217,7 +217,7 @@ vector<State> nextAlive(vector<State> states){
         }
       }
       if(dead) flag = false;
-      if(!st.ninjas[i].dir.size()) flag = false;
+      if(st.ninjas[i].dir.size() < 2) flag = false;
     }
     if(flag && st.isClose()) flag = false;
     if(flag)tmp.push_back(st);
@@ -300,8 +300,8 @@ vector<State> nearestSouls(vector<State> states){
 }
 
 void think(){
-  //thinkSkil(myState,rivalState,skills);
-  cout << 2 << endl;
+  thinkSkil(myState,rivalState,skills);
+  //cout << 2 << endl;
   vector<State> next;
   next = bfsNext(myState);
   next = nextAlive(next);
