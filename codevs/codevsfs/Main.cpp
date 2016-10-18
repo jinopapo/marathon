@@ -11,7 +11,7 @@ using namespace std;
 static const int EMPTY_BLOCK = 0;
 
 /** お邪魔ブロックの値 */
-int OBSTACLE_BLOCK = -1;
+int OBSTACLE_BLOCK = -10;
 
 mt19937 MT(8410325);
 
@@ -171,6 +171,7 @@ public:
   int turn;
   int remTime;
   vector<Pack> packs;
+  vector<vector<int>> moved;
   Field myField;
   Field nextMyField;
   Field enemyField;
@@ -216,6 +217,14 @@ public:
    */
   void executeTurn() {
     nextMyField = myField;
+    moved.clear();
+    for(int y=0;y<H;y++){
+      vector<int> row;
+      for(int x=0;x<W;x++){
+        row.push_back(false);
+      }
+      moved.push_back(row);
+    }
     int rot = randInt(0, 4);
 
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
@@ -226,6 +235,8 @@ public:
     int pos = randInt(0, W - packWidth + 1) - sides.first;
 
     fallPack(packs[turn],pos);
+    while(crearBlock() > 0)
+      fillBlock();
 
     for(int iy=0;iy<H;iy++){
       for(int ix=0;ix<W;ix++){
@@ -246,10 +257,10 @@ public:
         if(p.blocks[2-j][i] == 0 || btm[i] != 0)
           continue;
         int nowW = 0;
-        while(nowW+(2-j) != H-1 && nextMyField.blocks[nowW+(2-j)][pos+i] == 0)
+        while(nowW+(2-j) != H && nextMyField.blocks[nowW+(2-j)][pos+i] == 0)
           nowW++;
         if(nowW > 2)
-          btm[i] = nowW;
+          btm[i] = nowW-1;
         else
           return false;
       }
@@ -260,6 +271,7 @@ public:
       for(int j=0;j<3;j++){
         if(p.blocks[2-j][i] != 0){
           nextMyField.blocks[btm[i]+2-j+emp][pos+i] = p.blocks[2-j][i];
+          moved[btm[i]+2-j+emp][pos+i] = true;
           empty = true;
         }else if(empty){
           emp++;
@@ -267,6 +279,57 @@ public:
       }
     }
     return true;
+  }
+
+  int crearBlock(){
+    int score = 0;
+    for(int y=0;y<H;y++){
+      for(int x=0;x<W;x++){
+        if(!moved[y][x])
+          continue;
+        int dx[8] = {-1,0,1,-1,1,-1,0,1};
+        int dy[8] = {1,1,1,0,0,-1,-1,-1};
+        for(int i=0;i<8;i++){
+          if(y+dy[i] < 0 || y+dy[i] >= H || x+dx[i] < 0 || x+dx[i] >= W)
+            continue;
+          int sum = 0;
+          int count = 0;
+          while(sum < 10 && y+count*dy[i] >= 0 && y+count*dy[i] < H && x+count*dx[i] >= 0 && x+count*dx[i] < W){
+            sum += nextMyField.blocks[y+count*dy[i]][x+count*dx[i]];
+            count++;
+          }
+          if(sum == 10){
+            score++;
+            for(int j=1;j<count;j++){
+              nextMyField.blocks[y+j*dy[i]][x+j*dx[i]] = 0;
+            }
+          }
+        }
+        nextMyField.blocks[y][x] = 0;
+        moved[y][x] = false;
+      }
+    }
+    return score;
+  }
+
+  void fillBlock(){
+    for(int x=0;x<W;x++){
+      for(int y=0;y<H;y++){
+        if(nextMyField.blocks[H-y-1][x] != 0)
+          continue;
+        int empty = 0;
+        while(y+empty<H && nextMyField.blocks[H-y-empty-1][x] == 0){
+          empty++;
+        }
+        int mvCnt = 0;
+        for(int i=y+empty;i<H && nextMyField.blocks[H-i-1][x] != 0;i++){
+          nextMyField.blocks[H-y-1][x] = nextMyField.blocks[H-i-1][x];
+          moved[H-y-mvCnt-1][x] = true;
+          nextMyField.blocks[H-i-1][x] = 0;
+          mvCnt++;
+        }
+      }
+    }
   }
 };
 
