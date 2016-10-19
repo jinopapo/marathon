@@ -216,7 +216,6 @@ public:
    * - ただし、落下位置は、左端・右端に詰められる場合は、それも考慮する(-2, -1, 8, 9にも落とせる場合は落とす)
    */
   void executeTurn() {
-    nextMyField = myField;
     moved.clear();
     for(int y=0;y<H;y++){
       vector<int> row;
@@ -225,28 +224,56 @@ public:
       }
       moved.push_back(row);
     }
-    int rot = randInt(0, 4);
-
+    bool alive = false;
+    int outRot=0;
+    int outPos=0;
+    int maxScore = -1;
+    int maxCombo = -1;
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
-    packs[turn].rotate(rot);
+    for(int i=0;i<10000;i++){
+      int rot;
+      int pos;
+      Pack p = packs[turn];
+      nextMyField = myField;
+      rot = randInt(0, 4);
 
-    pair<int,int> sides = packs[turn].getSides();
-    int packWidth = sides.second - sides.first + 1;
-    int pos = randInt(0, W - packWidth + 1) - sides.first;
+      p.rotate(rot);
 
-    fallPack(packs[turn],pos);
-    while(crearBlock() > 0)
-      fillBlock();
+      pair<int,int> sides = p.getSides();
+      int packWidth = sides.second - sides.first + 1;
+      pos = randInt(0, W - packWidth + 1) - sides.first;
 
-    for(int iy=0;iy<H;iy++){
+      alive = fallPack(p,pos);
+      if(!alive)
+        continue;
+      int score = crearBlock();
+      int sum_score = score;
+      int combo = 0;
+      if(score > 0)
+        combo++;
+      while(score > 0){
+        fillBlock();
+        score = crearBlock();
+        sum_score += score;
+        if(score > 0)
+          combo++;
+      }
+      if(maxCombo <= combo && maxScore < sum_score){
+        maxScore = sum_score;
+        maxCombo = combo;
+        outPos = pos;
+        outRot = rot;
+      }
+
+    /*for(int iy=0;iy<H;iy++){
       for(int ix=0;ix<W;ix++){
         cerr << nextMyField.blocks[iy][ix];
       }
       cerr << endl;
     }
-    cerr << endl;
-
-    cout << pos << " " << packs[turn].rotateCnt << endl;
+    cerr << endl;*/
+    }
+    cout << outPos << " " << outRot << endl;
     cout.flush();
   }
 
@@ -259,7 +286,12 @@ public:
         int nowW = 0;
         while(nowW+(2-j) != H && nextMyField.blocks[nowW+(2-j)][pos+i] == 0)
           nowW++;
-        if(nowW > 2)
+        int bNum = 0;
+        for(int k=j+1;k<3;k++){
+          if(p.blocks[2-k][i] > 0)
+            bNum++;
+        }
+        if(nowW - bNum > 0)
           btm[i] = nowW-1;
         else
           return false;
@@ -334,7 +366,7 @@ public:
 };
 
 int main() {
-  cout << "SampleAI.cpp" << endl;
+  cout << "ji_no_papo" << endl;
   cout.flush();
 
   State state = State::inputFirst();
