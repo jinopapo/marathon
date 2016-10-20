@@ -249,7 +249,7 @@ public:
     int maxCombo = -1;
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
     bool test = true;
-    for(int i=0;i<10000;i++){
+    for(int i=0;i<1000;i++){
       int rot;
       int pos;
       Pack p = packs[turn];
@@ -262,17 +262,15 @@ public:
       int packWidth = sides.second - sides.first + 1;
       pos = randInt(0, W - packWidth + 1) - sides.first;
       fallPack(p,pos);
-      int score = crearBlock();
-      int sum_score = score;
       int combo = 0;
-      if(score > 0)
-        combo++;
+      int score = crearBlock(combo);
+      int sum_score = score;
       while(score > 0){
-        fillBlock();
-        score = crearBlock();
-        sum_score += score;
         if(score > 0)
           combo++;
+        fillBlock();
+        score = crearBlock(combo);
+        sum_score += score;
       }
       alive = gameSet();
       if(!alive)
@@ -285,7 +283,9 @@ public:
         outRot = rot;
       }
     }
-    myField.show();
+
+    //myField.show();
+
     if(test)
       cerr << "dead" << endl;
 
@@ -312,7 +312,10 @@ public:
     }
   }
 
-  int crearBlock(){
+  int crearBlock(int combo){
+    float comboBonus = 1.3;
+    for(int i=0;i< combo;i++)
+      comboBonus *= comboBonus;
     int score = 0;
     for(int y=0;y<H;y++){
       for(int x=0;x<W;x++){
@@ -345,7 +348,7 @@ public:
         remove[y][x] = false;
       }
     }
-    return score;
+    return (int)comboBonus*(int)(score/2);
   }
 
   void fillBlock(){
