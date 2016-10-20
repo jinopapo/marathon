@@ -322,7 +322,6 @@ public:
     int outRot = 0;
     int outPos = 0;
     int maxScore = -1;
-    int maxCombo = -1;
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
     bool test = true;
     for(int rot=0;rot < 4;rot++){
@@ -351,7 +350,41 @@ public:
         if(maxScore < sum_score){
           test = false;
           maxScore = sum_score;
-          maxCombo = combo;
+          outPos = pos;
+          outRot = rot;
+        }
+        int mSumScore = 0;
+        for(int sample=0;sample<30;sample++){
+          Field mMyField = nextMyField;
+          for(int depth=0;depth<10;depth++){
+            if(!alive || turn + depth >= 499)
+              continue;
+            Pack mp = packs[turn+depth+1];
+            int mrot = randInt(0, 4);
+            mp.rotate(mrot);
+            pair<int,int> mSides = mp.getSides();
+            int mPackWidth = mSides.second - mSides.first + 1;
+            //int mpos = randInt(0, W - mPackWidth + 1) - mSides.first;
+            int mpos = randInt(0, 7);
+            //cerr << "hage" << endl;
+            mMyField.fallPack(mp,mpos);
+            //cerr << "hoge" << endl;
+            int mCombo = 0;
+            int mScore = mMyField.crearBlock(combo);
+            //cerr << "hige" << endl;
+            mSumScore += mScore;
+            while(mScore > 0){
+              if(mScore > 0)
+                mCombo++;
+              mMyField.fillBlock();
+              mScore = mMyField.crearBlock(mCombo);
+              mSumScore += mScore;
+            }
+            alive = mMyField.gameSet();
+          }
+        }
+        if(maxScore < mSumScore/200){
+          maxScore = mSumScore/200;
           outPos = pos;
           outRot = rot;
         }
