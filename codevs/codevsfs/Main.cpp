@@ -42,9 +42,13 @@ public:
     for (int i = 0; i < H; i++) {
       vector<int> row;
       for (int j = 0; j < W; j++) {
-        int block;
-        cin >> block;
-        row.push_back(block);
+        if(i < 3){
+          row.push_back(0);
+        }else{
+          int block;
+          cin >> block;
+          row.push_back(block);
+        }
       }
       blocks.push_back(row);
     }
@@ -64,6 +68,10 @@ public:
     }
     cerr << "====" << endl;
     cerr.flush();
+  }
+
+  bool inField(int y,int x){
+    return (y >= 0 && y < H && x >= 0 && x < W);
   }
 };
 
@@ -172,6 +180,7 @@ public:
   int remTime;
   vector<Pack> packs;
   vector<vector<int>> moved;
+  vector<vector<int>> remove;
   Field myField;
   Field nextMyField;
   Field enemyField;
@@ -186,6 +195,7 @@ public:
   static State inputFirst() {
     State st;
     cin >> st.W >> st.H >> st.T >> st.S >> st.N;
+    st.H += 3;
     st.packs.clear();
     for (int i = 0; i < st.N; i++) {
       Pack pack = Pack::inputFirst(st.T);
@@ -224,12 +234,21 @@ public:
       }
       moved.push_back(row);
     }
+    remove.clear();
+    for(int y=0;y<H;y++){
+      vector<int> row;
+      for(int x=0;x<W;x++){
+        row.push_back(false);
+      }
+      remove.push_back(row);
+    }
     bool alive = false;
     int outRot=0;
     int outPos=0;
     int maxScore = -1;
     int maxCombo = -1;
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
+    bool test = true;
     for(int i=0;i<10000;i++){
       int rot;
       int pos;
@@ -242,10 +261,7 @@ public:
       pair<int,int> sides = p.getSides();
       int packWidth = sides.second - sides.first + 1;
       pos = randInt(0, W - packWidth + 1) - sides.first;
-
-      alive = fallPack(p,pos);
-      if(!alive)
-        continue;
+      fallPack(p,pos);
       int score = crearBlock();
       int sum_score = score;
       int combo = 0;
@@ -258,59 +274,42 @@ public:
         if(score > 0)
           combo++;
       }
-      if(maxCombo <= combo && maxScore < sum_score){
+      alive = gameSet();
+      if(!alive)
+        continue;
+      if(maxScore < sum_score){
+        test = false;
         maxScore = sum_score;
         maxCombo = combo;
         outPos = pos;
         outRot = rot;
       }
+    }
+    myField.show();
+    if(test)
+      cerr << "dead" << endl;
 
-    /*for(int iy=0;iy<H;iy++){
-      for(int ix=0;ix<W;ix++){
-        cerr << nextMyField.blocks[iy][ix];
-      }
-      cerr << endl;
-    }
-    cerr << endl;*/
-    }
     cout << outPos << " " << outRot << endl;
     cout.flush();
   }
 
-  bool fallPack(Pack p, int pos){
-    int btm[3]={};
-    for(int i=0;i<3;i++){
-      for(int j=0;j<3;j++){
-        if(p.blocks[2-j][i] == 0 || btm[i] != 0)
+  void fallPack(Pack p, int pos){
+    for(int px=0;px<3;px++){
+      int y = 0;
+      for(int py=0;py<3;py++){
+        if(p.blocks[2-py][px] == 0)
           continue;
-        int nowW = 0;
-        while(nowW+(2-j) != H && nextMyField.blocks[nowW+(2-j)][pos+i] == 0)
-          nowW++;
-        int bNum = 0;
-        for(int k=j+1;k<3;k++){
-          if(p.blocks[2-k][i] > 0)
-            bNum++;
-        }
-        if(nowW - bNum > 0)
-          btm[i] = nowW-1;
-        else
-          return false;
-      }
-    }
-    for(int i=0;i<3;i++){
-      bool empty = false;
-      int emp = 0;
-      for(int j=0;j<3;j++){
-        if(p.blocks[2-j][i] != 0){
-          nextMyField.blocks[btm[i]+2-j+emp][pos+i] = p.blocks[2-j][i];
-          moved[btm[i]+2-j+emp][pos+i] = true;
-          empty = true;
-        }else if(empty){
-          emp++;
+        while(y < H && nextMyField.blocks[y][pos+px] == 0)
+          y++;
+        for(;py<3;py++){
+          if(p.blocks[2-py][px] == 0)
+            continue;
+          nextMyField.blocks[y-1][pos+px] = p.blocks[2-py][px];
+          moved[y-1][pos+px] = true;
+          y--;
         }
       }
     }
-    return true;
   }
 
   int crearBlock(){
@@ -319,26 +318,31 @@ public:
       for(int x=0;x<W;x++){
         if(!moved[y][x])
           continue;
+        moved[y][x] = false;
         int dx[8] = {-1,0,1,-1,1,-1,0,1};
         int dy[8] = {1,1,1,0,0,-1,-1,-1};
         for(int i=0;i<8;i++){
-          if(y+dy[i] < 0 || y+dy[i] >= H || x+dx[i] < 0 || x+dx[i] >= W)
+          if(!nextMyField.inField(y+dy[i],x+dx[i]))
             continue;
           int sum = 0;
           int count = 0;
-          while(sum < 10 && y+count*dy[i] >= 0 && y+count*dy[i] < H && x+count*dx[i] >= 0 && x+count*dx[i] < W){
+          while(sum < 10 && nextMyField.inField(y+count*dy[i],x+count*dx[i]) && nextMyField.blocks[y+dy[i]][x+dx[i]] != 0){
             sum += nextMyField.blocks[y+count*dy[i]][x+count*dx[i]];
             count++;
           }
           if(sum == 10){
             score++;
-            for(int j=1;j<count;j++){
-              nextMyField.blocks[y+j*dy[i]][x+j*dx[i]] = 0;
-            }
+            for(int j=0;j<count;j++)
+              remove[y+j*dy[i]][x+j*dx[i]] = true;
           }
         }
-        nextMyField.blocks[y][x] = 0;
-        moved[y][x] = false;
+      }
+    }
+    for(int y=0;y<H;y++){
+      for(int x=0;x<W;x++){
+        if(remove[y][x])
+          nextMyField.blocks[y][x] = 0;
+        remove[y][x] = false;
       }
     }
     return score;
@@ -346,22 +350,29 @@ public:
 
   void fillBlock(){
     for(int x=0;x<W;x++){
+      int nowH = 0;
       for(int y=0;y<H;y++){
-        if(nextMyField.blocks[H-y-1][x] != 0)
-          continue;
-        int empty = 0;
-        while(y+empty<H && nextMyField.blocks[H-y-empty-1][x] == 0){
-          empty++;
+        if(nextMyField.blocks[H-y-1][x] == 0){
+          while(y<H && nextMyField.blocks[H-y-1][x] == 0)
+            y++;
         }
-        int mvCnt = 0;
-        for(int i=y+empty;i<H && nextMyField.blocks[H-i-1][x] != 0;i++){
-          nextMyField.blocks[H-y-1][x] = nextMyField.blocks[H-i-1][x];
-          moved[H-y-mvCnt-1][x] = true;
-          nextMyField.blocks[H-i-1][x] = 0;
-          mvCnt++;
+        if(y != H && nowH != y){
+          nextMyField.blocks[H-nowH-1][x] = nextMyField.blocks[H-y-1][x];
+          moved[H-nowH-1][x] = true;
         }
+        nowH++;
       }
     }
+  }
+
+  bool gameSet(){
+    for(int y=0;y<3;y++){
+      for(int x=0;x<W;x++){
+        if(nextMyField.blocks[y][x] != 0)
+          return false;
+      }
+    }
+    return true;
   }
 };
 
