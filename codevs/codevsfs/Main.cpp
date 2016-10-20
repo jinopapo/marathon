@@ -353,10 +353,10 @@ public:
           outPos = pos;
           outRot = rot;
         }
-        int mSumScore = 0;
-        for(int sample=0;sample<30;sample++){
+        for(int sample=0;sample<50;sample++){
           Field mMyField = nextMyField;
-          for(int depth=0;depth<10;depth++){
+          for(int depth=0;depth<20;depth++){
+            int mSumScore = 0;
             if(!alive || turn + depth >= 499)
               continue;
             Pack mp = packs[turn+depth+1];
@@ -364,8 +364,8 @@ public:
             mp.rotate(mrot);
             pair<int,int> mSides = mp.getSides();
             int mPackWidth = mSides.second - mSides.first + 1;
-            //int mpos = randInt(0, W - mPackWidth + 1) - mSides.first;
-            int mpos = randInt(0, 7);
+            int mpos = randInt(0, W - mPackWidth + 1) - mSides.first;
+            //int mpos = randInt(0, 7);
             //cerr << "hage" << endl;
             mMyField.fallPack(mp,mpos);
             //cerr << "hoge" << endl;
@@ -381,12 +381,12 @@ public:
               mSumScore += mScore;
             }
             alive = mMyField.gameSet();
+            if(alive && maxScore < mSumScore){
+              maxScore = mSumScore;
+              outPos = pos;
+              outRot = rot;
+            }
           }
-        }
-        if(maxScore < mSumScore/200){
-          maxScore = mSumScore/200;
-          outPos = pos;
-          outRot = rot;
         }
       }
     }
