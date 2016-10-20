@@ -227,65 +227,54 @@ public:
    */
   void executeTurn() {
     moved.clear();
-    for(int y=0;y<H;y++){
-      vector<int> row;
-      for(int x=0;x<W;x++){
-        row.push_back(false);
-      }
-      moved.push_back(row);
-    }
     remove.clear();
     for(int y=0;y<H;y++){
       vector<int> row;
       for(int x=0;x<W;x++){
         row.push_back(false);
       }
+      moved.push_back(row);
       remove.push_back(row);
     }
     bool alive = false;
-    int outRot=0;
-    int outPos=0;
+    int outRot = 0;
+    int outPos = 0;
     int maxScore = -1;
     int maxCombo = -1;
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
     bool test = true;
-    for(int i=0;i<1000;i++){
-      int rot;
-      int pos;
+    for(int rot=0;rot < 4;rot++){
       Pack p = packs[turn];
-      nextMyField = myField;
-      rot = randInt(0, 4);
-
+      p.fillWithObstacle(myObstacle);
       p.rotate(rot);
-
-      pair<int,int> sides = p.getSides();
-      int packWidth = sides.second - sides.first + 1;
-      pos = randInt(0, W - packWidth + 1) - sides.first;
-      fallPack(p,pos);
-      int combo = 0;
-      int score = crearBlock(combo);
-      int sum_score = score;
-      while(score > 0){
-        if(score > 0)
-          combo++;
-        fillBlock();
-        score = crearBlock(combo);
-        sum_score += score;
-      }
-      alive = gameSet();
-      if(!alive)
-        continue;
-      if(maxScore < sum_score){
-        test = false;
-        maxScore = sum_score;
-        maxCombo = combo;
-        outPos = pos;
-        outRot = rot;
+      for(int pos = -2;pos < 10;pos++){
+        nextMyField = myField;
+        pair<int,int> sides = p.getSides();
+        if(pos + sides.first < 0 || pos + sides.second > 9)
+          continue;
+        fallPack(p,pos);
+        int combo = 0;
+        int score = crearBlock(combo);
+        int sum_score = score;
+        while(score > 0){
+          if(score > 0)
+            combo++;
+          fillBlock();
+          score = crearBlock(combo);
+          sum_score += score;
+        }
+        alive = gameSet();
+        if(!alive)
+          continue;
+        if(maxScore < sum_score){
+          test = false;
+          maxScore = sum_score;
+          maxCombo = combo;
+          outPos = pos;
+          outRot = rot;
+        }
       }
     }
-
-    //myField.show();
-
     if(test)
       cerr << "dead" << endl;
 
@@ -322,19 +311,17 @@ public:
         if(!moved[y][x])
           continue;
         moved[y][x] = false;
-        int dx[8] = {-1,0,1,-1,1,-1,0,1};
-        int dy[8] = {1,1,1,0,0,-1,-1,-1};
-        for(int i=0;i<8;i++){
-          if(!nextMyField.inField(y+dy[i],x+dx[i]))
-            continue;
-          int sum = 0;
-          int count = 0;
-          while(sum < 10 && nextMyField.inField(y+count*dy[i],x+count*dx[i]) && nextMyField.blocks[y+dy[i]][x+dx[i]] != 0){
+        int dx[7] = {-1,-1,-1,0,1,1,1};
+        int dy[7] = {-1,0,1,1,-1,0,1};
+        for(int i=0;i<7;i++){
+          int sum = nextMyField.blocks[y][x];
+          int count = 1;
+          while(sum < 10 && nextMyField.inField(y+count*dy[i],x+count*dx[i]) && nextMyField.blocks[y+count*dy[i]][x+count*dx[i]] != 0){
             sum += nextMyField.blocks[y+count*dy[i]][x+count*dx[i]];
             count++;
           }
           if(sum == 10){
-            score++;
+            score += count;
             for(int j=0;j<count;j++)
               remove[y+j*dy[i]][x+j*dx[i]] = true;
           }
