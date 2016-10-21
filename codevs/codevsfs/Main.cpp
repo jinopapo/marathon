@@ -268,6 +268,24 @@ public:
   bool inField(int y,int x){
     return (y >= 0 && y < H && x >= 0 && x < W);
   }
+
+  int doTurn(Pack p,int pos){
+    fallPack(p,pos);
+    int combo = 0;
+    int score = 1;
+    int sum_score = 0;
+    while(score > 0){
+      score = crearBlock(combo);
+      fillBlock();
+      sum_score += score;
+      combo++;
+    }
+    bool alive = gameSet();
+    if(!alive)
+      return -1;
+    else
+      return sum_score;
+  }
 };
 
 
@@ -341,25 +359,15 @@ public:
         pair<int,int> sides = p.getSides();
         if(pos + sides.first < 0 || pos + sides.second > 9)
           continue;
-        nextMyField.fallPack(p,pos);
-        int combo = 0;
-        int score = 1;
-        int sum_score = 0;
-        while(score > 0){
-          score = nextMyField.crearBlock(combo);
-          nextMyField.fillBlock();
-          sum_score += score;
-          combo++;
-        }
-        alive = nextMyField.gameSet();
-        if(!alive)
+        int score = nextMyField.doTurn(p,pos);
+        if(score < 0)
           continue;
         test = false;
         pair<int,int> out(pos,rot);
         outs.push_back(out);
-        if(maxScore < sum_score){
+        if(maxScore < score){
           ans = outs;
-          maxScore = sum_score;
+          maxScore = score;
         }
         for(int sample=0;sample<50;sample++){
           Field mMyField = nextMyField;
