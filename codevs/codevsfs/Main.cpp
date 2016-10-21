@@ -202,8 +202,9 @@ public:
   int crearBlock(int combo){
     float comboBonus = 1.3;
     for(int i=0;i< combo;i++)
-      comboBonus *= comboBonus;
+      comboBonus *= 1.3;
     int score = 0;
+    //cerr << combo << endl;
     for(int y=0;y<H;y++){
       for(int x=0;x<W;x++){
         if(!moved[y][x])
@@ -228,8 +229,9 @@ public:
     }
     for(int y=0;y<H;y++){
       for(int x=0;x<W;x++){
-        if(remove[y][x])
+        if(remove[y][x]){
           blocks[y][x] = 0;
+        }
         remove[y][x] = false;
       }
     }
@@ -246,6 +248,7 @@ public:
         }
         if(y != H && nowH != y){
           blocks[H-nowH-1][x] = blocks[H-y-1][x];
+          blocks[H-y-1][x] = 0;
           moved[H-nowH-1][x] = true;
         }
         nowH++;
@@ -278,8 +281,11 @@ public:
   Field enemyField;
   int myObstacle;
   int enemyObstacle;
+  vector<pair<int,int>> ans;
+  int maxScore;
 
-  State() {}
+  State() :
+    maxScore(-1) {}
 
   /**
    * Stateを入力します。Stateを生成するときは必ず呼び出してください。
@@ -319,9 +325,10 @@ public:
    */
   void executeTurn() {
     bool alive = false;
-    int outRot = 0;
-    int outPos = 0;
-    int maxScore = -1;
+    if(myObstacle > 0){
+      ans.clear();
+      maxScore = -1;
+    }
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
     bool test = true;
     for(int rot=0;rot < 4;rot++){
@@ -330,70 +337,78 @@ public:
       p.rotate(rot);
       for(int pos = -2;pos < 10;pos++){
         Field nextMyField = myField;
+        vector<pair<int,int>> outs;
         pair<int,int> sides = p.getSides();
         if(pos + sides.first < 0 || pos + sides.second > 9)
           continue;
         nextMyField.fallPack(p,pos);
         int combo = 0;
-        int score = nextMyField.crearBlock(combo);
-        int sum_score = score;
+        int score = 1;
+        int sum_score = 0;
         while(score > 0){
-          if(score > 0)
-            combo++;
-          nextMyField.fillBlock();
           score = nextMyField.crearBlock(combo);
+          nextMyField.fillBlock();
           sum_score += score;
+          combo++;
         }
         alive = nextMyField.gameSet();
         if(!alive)
           continue;
+        test = false;
+        pair<int,int> out(pos,rot);
+        outs.push_back(out);
         if(maxScore < sum_score){
-          test = false;
+          ans = outs;
           maxScore = sum_score;
-          outPos = pos;
-          outRot = rot;
         }
-        for(int sample=0;sample<50;sample++){
+        for(int sample=0;sample<30;sample++){
           Field mMyField = nextMyField;
-          for(int depth=0;depth<20;depth++){
-            int mSumScore = 0;
+          int mMyObstacle = myObstacle;
+          vector<pair<int,int>> mouts = outs;
+          alive = true;
+          for(int depth=0;depth<10;depth++){
             if(!alive || turn + depth >= 499)
               continue;
             Pack mp = packs[turn+depth+1];
+            mMyObstacle -= mp.fillWithObstacle(mMyObstacle);
             int mrot = randInt(0, 4);
             mp.rotate(mrot);
             pair<int,int> mSides = mp.getSides();
             int mPackWidth = mSides.second - mSides.first + 1;
             int mpos = randInt(0, W - mPackWidth + 1) - mSides.first;
-            //int mpos = randInt(0, 7);
-            //cerr << "hage" << endl;
             mMyField.fallPack(mp,mpos);
-            //cerr << "hoge" << endl;
             int mCombo = 0;
-            int mScore = mMyField.crearBlock(combo);
-            //cerr << "hige" << endl;
-            mSumScore += mScore;
+            int mScore = 1;
+            int mSumScore = 0;
             while(mScore > 0){
-              if(mScore > 0)
-                mCombo++;
-              mMyField.fillBlock();
               mScore = mMyField.crearBlock(mCombo);
+              mMyField.fillBlock();
               mSumScore += mScore;
+              mCombo++;
             }
             alive = mMyField.gameSet();
-            if(alive && maxScore < mSumScore){
+            if(!alive)
+              continue;
+            pair<int,int> mout(mpos,mrot);
+            mouts.push_back(mout);
+            if(maxScore < mSumScore && mCombo < 10){
               maxScore = mSumScore;
-              outPos = pos;
-              outRot = rot;
+              ans = mouts;
             }
           }
         }
       }
     }
-    if(test)
+    //cerr << ans.size() << " " << maxScore << endl;
+    if((int)ans.size() == 0){
+      cout << 0 << " " << 0 << endl;
       cerr << "dead" << endl;
-
-    cout << outPos << " " << outRot << endl;
+    }else{
+      cout << ans[0].first << " " << ans[0].second << endl;
+      ans.erase(ans.begin());
+      if((int)ans.size() == 0)
+        maxScore = -1;
+    }
     cout.flush();
   }
 };
