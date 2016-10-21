@@ -361,7 +361,7 @@ public:
           ans = outs;
           maxScore = sum_score;
         }
-        for(int sample=0;sample<30;sample++){
+        for(int sample=0;sample<50;sample++){
           Field mMyField = nextMyField;
           int mMyObstacle = myObstacle;
           vector<pair<int,int>> mouts = outs;
