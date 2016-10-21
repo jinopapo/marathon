@@ -391,7 +391,7 @@ public:
               continue;
             pair<int,int> mout(mpos,mrot);
             mouts.push_back(mout);
-            if(maxScore < mSumScore && mCombo < 10){
+            if(maxScore < mSumScore){
               maxScore = mSumScore;
               ans = mouts;
             }
