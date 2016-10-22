@@ -204,7 +204,6 @@ public:
     for(int i=0;i< combo;i++)
       comboBonus *= 1.3;
     int score = 0;
-    //cerr << combo << endl;
     for(int y=0;y<H;y++){
       for(int x=0;x<W;x++){
         if(!moved[y][x])
@@ -344,14 +343,30 @@ public:
   void executeTurn() {
     bool alive = false;
     if(myObstacle > 0){
-      ans.clear();
+      Field f = myField;
       maxScore = -1;
+      int obstacle = myObstacle;
+      for(int i=0;i<(int)ans.size();i++){
+        Pack p = packs[turn+i];
+        obstacle -= p.fillWithObstacle(obstacle);
+        p.rotate(ans[i].second);
+        pair<int,int> sides = p.getSides();
+        if(ans[i].first + sides.first < 0 || ans[i].first + sides.second > 9)
+          break;
+        int score = f.doTurn(p,ans[i].first);
+        if(score < 0){
+          ans.clear();
+          maxScore = -1;
+        }
+        if(score > maxScore){
+          maxScore = score;
+        }
+      }
     }
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
     bool test = true;
     for(int rot=0;rot < 4;rot++){
       Pack p = packs[turn];
-      p.fillWithObstacle(myObstacle);
       p.rotate(rot);
       for(int pos = -2;pos < 10;pos++){
         Field nextMyField = myField;
@@ -366,48 +381,28 @@ public:
         pair<int,int> out(pos,rot);
         outs.push_back(out);
         if(maxScore < score){
-          ans = outs;
           maxScore = score;
+          ans = outs;
         }
-        for(int sample=0;sample<50;sample++){
-          Field mMyField = nextMyField;
-          int mMyObstacle = myObstacle;
-          vector<pair<int,int>> mouts = outs;
-          alive = true;
-          for(int depth=0;depth<10;depth++){
-            if(!alive || turn + depth >= 499)
-              continue;
-            Pack mp = packs[turn+depth+1];
-            mMyObstacle -= mp.fillWithObstacle(mMyObstacle);
-            int mrot = randInt(0, 4);
-            mp.rotate(mrot);
-            pair<int,int> mSides = mp.getSides();
-            int mPackWidth = mSides.second - mSides.first + 1;
-            int mpos = randInt(0, W - mPackWidth + 1) - mSides.first;
-            mMyField.fallPack(mp,mpos);
-            int mCombo = 0;
-            int mScore = 1;
-            int mSumScore = 0;
-            while(mScore > 0){
-              mScore = mMyField.crearBlock(mCombo);
-              mMyField.fillBlock();
-              mSumScore += mScore;
-              mCombo++;
-            }
-            alive = mMyField.gameSet();
-            if(!alive)
-              continue;
-            pair<int,int> mout(mpos,mrot);
-            mouts.push_back(mout);
-            if(maxScore < mSumScore){
-              maxScore = mSumScore;
-              ans = mouts;
-            }
-          }
-        }
+        monte(50,10,nextMyField,myObstacle,outs,turn);
       }
     }
-    //cerr << ans.size() << " " << maxScore << endl;
+    /*for(int depth=0;depth < 5;depth++){
+      if((int)ans.size() <= depth)
+        continue;
+      int nextTurn = turn+depth;
+      Pack p = packs[nextTurn];
+      myObstacle -= p.fillWithObstacle(myObstacle);
+      p.rotate(ans[depth].second);
+      myField.doTurn(p,ans[depth].first);
+      vector<pair<int,int>> outs;
+      outs.push_back(ans[0]);
+      for(int i=0;i<depth;i++){
+        outs.push_back(ans[i+1]);
+      }
+      monte(10,10,myField,myObstacle,outs,nextTurn);
+      }*/
+    cerr << ans.size() << " " << maxScore << endl;
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
       cerr << "dead" << endl;
@@ -418,6 +413,36 @@ public:
         maxScore = -1;
     }
     cout.flush();
+  }
+
+  void monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
+    for(int sample=0;sample<sampleNum;sample++){
+      Field nextField = field;
+      int nextObstacle = obstacle;
+      vector<pair<int,int>> mouts = outs;
+      bool alive = true;
+      for(int depth=0;depth<depthNum;depth++){
+        if(!alive || mturn + depth >= 499)
+          continue;
+        Pack p = packs[mturn+depth+1];
+        nextObstacle -= p.fillWithObstacle(nextObstacle);
+        int rot = randInt(0, 4);
+        p.rotate(rot);
+        pair<int,int> sides = p.getSides();
+        int packWidth = sides.second - sides.first + 1;
+        int pos = randInt(0, W - packWidth + 1) - sides.first;
+        int score = nextField.doTurn(p,pos);
+        if(score < 0){
+          alive = false;
+          continue;
+        }
+        mouts.push_back(pair<int,int>(pos,rot));
+        if(maxScore < score){
+          maxScore = score;
+          ans = mouts;
+        }
+      }
+    }
   }
 };
 
