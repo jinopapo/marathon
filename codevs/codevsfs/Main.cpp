@@ -369,7 +369,6 @@ public:
       }
     }
     myObstacle -= packs[turn].fillWithObstacle(myObstacle);
-    bool test = true;
     for(int rot=0;rot < 4;rot++){
       Pack p = packs[turn];
       p.rotate(rot);
@@ -382,31 +381,15 @@ public:
         int score = nextMyField.doTurn(p,pos);
         if(score < 0)
           continue;
-        test = false;
         pair<int,int> out(pos,rot);
         outs.push_back(out);
         if(maxScore < score){
           maxScore = score;
           ans = outs;
         }
-        monte(50,10,nextMyField,myObstacle,outs,turn);
+        monte(80,10,nextMyField,myObstacle,outs,turn);
       }
     }
-    /*for(int depth=0;depth < 5;depth++){
-      if((int)ans.size() <= depth)
-        continue;
-      int nextTurn = turn+depth;
-      Pack p = packs[nextTurn];
-      myObstacle -= p.fillWithObstacle(myObstacle);
-      p.rotate(ans[depth].second);
-      myField.doTurn(p,ans[depth].first);
-      vector<pair<int,int>> outs;
-      outs.push_back(ans[0]);
-      for(int i=0;i<depth;i++){
-        outs.push_back(ans[i+1]);
-      }
-      monte(10,10,myField,myObstacle,outs,nextTurn);
-      }*/
     cerr << ans.size() << " " << maxScore << endl;
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
