@@ -214,11 +214,16 @@ public:
         for(int i=0;i<7;i++){
           int sum = blocks[y][x];
           int count = 1;
+          int removeCount = 0;
+          if(remove[y][x])
+            removeCount++;
           while(sum < 10 && inField(y+count*dy[i],x+count*dx[i]) && blocks[y+count*dy[i]][x+count*dx[i]] != 0){
             sum += blocks[y+count*dy[i]][x+count*dx[i]];
+            if(remove[y+count*dy[i]][x+count*dx[i]])
+              removeCount++;
             count++;
           }
-          if(sum == 10){
+          if(sum == 10 && removeCount != count){
             score += count;
             for(int j=0;j<count;j++)
               remove[y+j*dy[i]][x+j*dx[i]] = true;
