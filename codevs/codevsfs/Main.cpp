@@ -204,29 +204,56 @@ public:
     for(int i=0;i< combo;i++)
       comboBonus *= 1.3;
     int score = 0;
+    vector<vector<pair<int,int>>> removed;
     for(int y=0;y<H;y++){
       for(int x=0;x<W;x++){
         if(!moved[y][x])
           continue;
-        moved[y][x] = false;
-        int dx[7] = {-1,-1,-1,0,1,1,1};
-        int dy[7] = {-1,0,1,1,-1,0,1};
-        for(int i=0;i<7;i++){
-          int sum = blocks[y][x];
-          int count = 1;
-          int removeCount = 0;
-          if(remove[y][x])
-            removeCount++;
-          while(sum < 10 && inField(y+count*dy[i],x+count*dx[i]) && blocks[y+count*dy[i]][x+count*dx[i]] != 0){
-            sum += blocks[y+count*dy[i]][x+count*dx[i]];
-            if(remove[y+count*dy[i]][x+count*dx[i]])
-              removeCount++;
-            count++;
-          }
-          if(sum == 10 && removeCount != count){
-            score += count;
-            for(int j=0;j<count;j++)
-              remove[y+j*dy[i]][x+j*dx[i]] = true;
+        int dx[4] = {0,1,1,1};
+        int dy[4] = {1,-1,0,1};
+        for(int i=0;i<4;i++){
+          int nowx = x;
+          int nowy = y;
+          int nowSum = 0;
+          vector<pair<int,int>> before;
+          while(x == nowx + (int)before.size()*dx[i] && y == nowy + (int)before.size()*dy[i]){
+            int sum = nowSum;
+            int count = before.size();
+            vector<pair<int,int>> rmBlock = before;
+            while(sum < 10 && inField(nowy+count*dy[i],nowx+count*dx[i]) && blocks[nowy+count*dy[i]][nowx+count*dx[i]] != 0){
+              sum += blocks[nowy+count*dy[i]][nowx+count*dx[i]];
+              rmBlock.push_back(pair<int,int>(nowy+count*dy[i],nowx+count*dx[i]));
+              count++;
+            }
+            sort(rmBlock.begin(),rmBlock.end());
+            bool same = false;
+            for(auto itr = removed.begin();itr != removed.end();itr++){
+              if(same)
+                continue;
+              if(*itr == rmBlock)
+                same = true;
+            }
+            if(same){
+              nowx -= dx[i];
+              nowy -= dy[i];
+              if(inField(nowy,nowx) && blocks[nowy][nowx] != 0 &&nowSum+blocks[nowy][nowx] < 10){
+                nowSum += blocks[nowy][nowx];
+                before.push_back(pair<int,int>(nowy,nowx));
+              }
+              continue;
+            }
+            if(sum == 10){
+              score += count;
+              for(int j=0;j<count;j++)
+                remove[nowy+j*dy[i]][nowx+j*dx[i]] = true;
+              removed.push_back(rmBlock);
+            }
+            nowx -= dx[i];
+            nowy -= dy[i];
+            if(inField(nowy,nowx) && blocks[nowy][nowx] != 0 &&nowSum+blocks[nowy][nowx] < 10){
+              nowSum += blocks[nowy][nowx];
+              before.push_back(pair<int,int>(nowy,nowx));
+            }
           }
         }
       }
@@ -237,6 +264,7 @@ public:
           blocks[y][x] = 0;
         }
         remove[y][x] = false;
+        moved[y][x] = false;
       }
     }
     return (int)comboBonus*(int)(score/2);
@@ -273,7 +301,7 @@ public:
     return (y >= 0 && y < H && x >= 0 && x < W);
   }
 
-  int doTurn(Pack p,int pos){
+  pair<int,int> doTurn(Pack p,int pos){
     fallPack(p,pos);
     int combo = 0;
     int score = 1;
@@ -286,9 +314,9 @@ public:
     }
     bool alive = gameSet();
     if(!alive)
-      return -1;
+      return pair<int,int>(-1,-1);
     else
-      return sum_score;
+      return pair<int,int>(sum_score,combo-1);
   }
 };
 
@@ -358,19 +386,21 @@ public:
         pair<int,int> sides = p.getSides();
         if(ans[i].first + sides.first < 0 || ans[i].first + sides.second > 9)
           break;
-        int score = f.doTurn(p,ans[i].first);
+        int score = f.doTurn(p,ans[i].first).first;
         if(score < 0){
           ans.clear();
           maxScore = -1;
+          break;
         }
         if(score > maxScore){
           maxScore = score;
         }
       }
     }
-    myObstacle -= packs[turn].fillWithObstacle(myObstacle);
     for(int rot=0;rot < 4;rot++){
       Pack p = packs[turn];
+      int obstacle = myObstacle;
+      obstacle -= p.fillWithObstacle(obstacle);
       p.rotate(rot);
       for(int pos = -2;pos < 10;pos++){
         Field nextMyField = myField;
@@ -378,35 +408,51 @@ public:
         pair<int,int> sides = p.getSides();
         if(pos + sides.first < 0 || pos + sides.second > 9)
           continue;
-        int score = nextMyField.doTurn(p,pos);
+        int score = nextMyField.doTurn(p,pos).first;
         if(score < 0)
           continue;
         pair<int,int> out(pos,rot);
         outs.push_back(out);
-        if(maxScore < score){
+        if(maxScore < score /*&& score > 50*/){
           maxScore = score;
           ans = outs;
         }
-        monte(80,10,nextMyField,myObstacle,outs,turn);
+        float ave = monte(50,5,nextMyField,obstacle,outs,turn);
+        /*if(maxScore < ave){
+          maxScore = ave;
+          ans = outs;
+          }*/
       }
+    }
+    if(ans.size() > 1){
+      for(int depth=0;depth < (int)ans.size();depth++){
+        Pack p = packs[turn+depth];
+        myObstacle -= p.fillWithObstacle(myObstacle);
+        p.rotate(ans[depth].second);
+        myField.doTurn(p,ans[depth].first);
+      }
+      monte(100,10,myField,myObstacle,ans,turn+ans.size()-1);
     }
     cerr << ans.size() << " " << maxScore << endl;
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
-      cerr << "dead" << endl;
     }else{
       cout << ans[0].first << " " << ans[0].second << endl;
       ans.erase(ans.begin());
-      if((int)ans.size() == 0)
+      if((int)ans.size() == 0){
+        //cerr << maxScore << " " << turn << endl;
         maxScore = -1;
+      }
     }
     cout.flush();
   }
 
-  void monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
+  float monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
+    float ave = 0;
     for(int sample=0;sample<sampleNum;sample++){
       Field nextField = field;
       int nextObstacle = obstacle;
+      int sumScore = -1;
       vector<pair<int,int>> mouts = outs;
       bool alive = true;
       for(int depth=0;depth<depthNum;depth++){
@@ -419,18 +465,26 @@ public:
         pair<int,int> sides = p.getSides();
         int packWidth = sides.second - sides.first + 1;
         int pos = randInt(0, W - packWidth + 1) - sides.first;
-        int score = nextField.doTurn(p,pos);
+        pair<int,int> result = nextField.doTurn(p,pos);
+        int score = result.first;
+        int combo = result.second;
         if(score < 0){
           alive = false;
           continue;
         }
         mouts.push_back(pair<int,int>(pos,rot));
-        if(maxScore < score){
+        if(sumScore < score){
+          sumScore = score;
+        }
+        if(maxScore < score /*&& score > 50*/){
           maxScore = score;
           ans = mouts;
         }
       }
+      //if(sumScore > 10)
+      ave += sumScore;
     }
+    return ave/sampleNum;
   }
 };
 
