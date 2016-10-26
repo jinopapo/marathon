@@ -417,21 +417,25 @@ public:
           maxScore = score;
           ans = outs;
         }
-        float ave = monte(100,5,nextMyField,obstacle,outs,turn);
+        float ave = monte(50,5,nextMyField,obstacle,outs,turn);
       }
     }
     int done = 0;
     //for(int i=0;i<3;i++){
-      for(int depth=0;depth < (int)ans.size();depth++){
+    vector<pair<int,int>> doneList;
+      for(int depth=done;depth < (int)ans.size();depth++){
         Pack p = packs[turn+depth];
         myObstacle -= p.fillWithObstacle(myObstacle);
         p.rotate(ans[depth].second);
         myField.doTurn(p,ans[depth].first);
-        }
-      //done += (int)ans.size()-1;
-      monte(100,10,myField,myObstacle,ans,turn+ans.size()-1);
+        doneList.push_back(ans[depth]);
+        monte(100,5,myField,myObstacle,doneList,turn+depth);
+      }
+      //done = (int)ans.size();
+      //monte(100,5,myField,myObstacle,ans,turn+ans.size()-1);
+      //if(done < (int)ans.size())
+      //cerr << "updata" << endl;
       //}
-
     cerr << ans.size() << " " << maxScore << endl;
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
