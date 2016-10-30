@@ -5,6 +5,9 @@
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <queue>
+#include <time.h>
+
 using namespace std;
 
 /** ブロックが置かれていない場所の値 */
@@ -127,12 +130,11 @@ public:
   vector<vector<int>> blocks;
   vector<vector<bool>> moved;
   vector<vector<bool>> remove;
-
   Field() {}
   Field(int W, int H):
     W(W),
     H(H),
-    blocks(vector<vector<int>>(H, vector<int>(W, 0))) {}
+    blocks(vector<vector<int>>(H, vector<int>(W, 0))){}
 
   /**
    * フィールド1つ分を入力します。
@@ -224,6 +226,15 @@ public:
               sum += blocks[nowy+count*dy[i]][nowx+count*dx[i]];
               rmBlock.push_back(pair<int,int>(nowy+count*dy[i],nowx+count*dx[i]));
               count++;
+            }
+            if(sum != 10){
+              nowx -= dx[i];
+              nowy -= dy[i];
+              if(inField(nowy,nowx) && blocks[nowy][nowx] != 0 &&nowSum+blocks[nowy][nowx] < 10){
+                nowSum += blocks[nowy][nowx];
+                before.push_back(pair<int,int>(nowy,nowx));
+              }
+              continue;
             }
             sort(rmBlock.begin(),rmBlock.end());
             bool same = false;
@@ -334,10 +345,14 @@ public:
   vector<pair<int,int>> ans;
   int maxScore;
   int maxCombo;
+  int beam;
+  priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> maxScores;
+  vector<vector<pair<int,int>>> bouts;
 
   State() :
     maxScore(-1),
     maxCombo(-1) {}
+
   /**
    * Stateを入力します。Stateを生成するときは必ず呼び出してください。
    */
@@ -375,44 +390,69 @@ public:
    * - ただし、落下位置は、左端・右端に詰められる場合は、それも考慮する(-2, -1, 8, 9にも落とせる場合は落とす)
    */
   void executeTurn() {
+    bouts.clear();
+    maxScores = priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>>();
     if(myObstacle > 0){
       Field f = myField;
       maxScore = -1;
       maxCombo = -1;
       int obstacle = myObstacle;
-      vector<pair<int,int>> outs = ans;
-      ans.clear();
-      for(int i=0;i<(int)outs.size();i++){
+      vector<pair<int,int>> outs;
+      vector<pair<int,int>> now;
+      for(int i=0;i<(int)ans.size();i++){
         Pack p = packs[turn+i];
         obstacle -= p.fillWithObstacle(obstacle);
-        p.rotate(outs[i].second);
+        p.rotate(ans[i].second);
         pair<int,int> sides = p.getSides();
-        if(outs[i].first + sides.first < 0 || outs[i].first + sides.second > 9)
+        if(ans[i].first + sides.first < 0 || ans[i].first + sides.second > 9)
           break;
-        pair<int,int> result = f.doTurn(p,outs[i].first);
+        pair<int,int> result = f.doTurn(p,ans[i].first);
         int combo = result.second;
         int score = result.first;
         if(score < 0)
           break;
-        ans.push_back(outs[i]);
+        outs.push_back(ans[i]);
         if(score > maxScore){
           maxScore = score;
           maxCombo = combo;
-          ans = outs;
+          now = outs;
+        }
+      }
+      ans.clear();
+      ans = now;
+    }
+    if(maxScore < 100)
+      beam = 4;
+    else
+      beam = 1;
+    maxScores.push(pair<int,int>(maxScore,0));
+    bouts.push_back(ans);
+    allSearch(myField,myObstacle,vector<pair<int,int>>(),turn);
+    while(!maxScores.empty()){
+      int ind = maxScores.top().second;
+      int score = maxScores.top().first;
+      maxScores.pop();
+      vector<pair<int,int>> doneList;
+      int obstacle = myObstacle;
+      Field nextField = myField;
+      for(int depth=0;depth < (int)bouts[ind].size();depth++){
+        Pack p = packs[turn+depth];
+        obstacle -= p.fillWithObstacle(obstacle);
+        p.rotate(bouts[ind][depth].second);
+        nextField.doTurn(p,bouts[ind][depth].first);
+        doneList.push_back(bouts[ind][depth]);
+        pair<int,vector<pair<int,int>>> mresult;
+        if(bouts[ind].size() < 10)
+          mresult = monte(100,5,nextField,obstacle,doneList,turn+depth+1);
+        else
+          mresult = monte(50,5,nextField,obstacle,doneList,turn+depth+1);
+        if(score < mresult.first){
+          score = mresult.first;
+          bouts[ind] = mresult.second;
         }
       }
     }
-    allSearch(myField,myObstacle,vector<pair<int,int>>(),turn);
-    vector<pair<int,int>> doneList;
-    for(int depth=0;depth < (int)ans.size();depth++){
-      Pack p = packs[turn+depth];
-      myObstacle -= p.fillWithObstacle(myObstacle);
-      p.rotate(ans[depth].second);
-      myField.doTurn(p,ans[depth].first);
-      doneList.push_back(ans[depth]);
-      monte(100,5,myField,myObstacle,doneList,turn+depth+1);
-    }
-    cerr << ans.size() << " " << maxScore << " " << maxCombo << endl; 
+    cerr << ans.size() << " " << maxScore << endl; 
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
     }else{
@@ -428,6 +468,7 @@ public:
   }
 
   void allSearch(Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
+
     for(int rot=0;rot < 4;rot++){
       Pack p = packs[mturn];
       p.fillWithObstacle(obstacle);
@@ -442,21 +483,37 @@ public:
         if(score < 0)
           continue;
         mouts.push_back(pair<int,int>(pos,rot));
-        if(maxScore < score){
+        if(maxScore <= score){
           maxScore = score;
           ans = mouts;
         }
-        monte(50,5,nextField,obstacle,mouts,mturn+1);
+        if(maxScores.size() < beam){
+          maxScores.push(pair<int,int>(score,bouts.size()));
+          bouts.push_back(mouts);
+        }else if(maxScores.top().first < score){
+          bouts[maxScores.top().second] = mouts;
+          maxScores.push(pair<int,int>(score,maxScores.top().second));
+          maxScores.pop();
+        }
+        pair<int,vector<pair<int,int>>> mresult =  monte(50,5,nextField,obstacle,mouts,mturn+1);
+        if(maxScores.size() < beam){
+          maxScores.push(pair<int,int>(mresult.first,bouts.size()));
+          bouts.push_back(mresult.second);
+        }else if(maxScores.top().first < mresult.first){
+          bouts[maxScores.top().second] = mresult.second;
+          maxScores.push(pair<int,int>(mresult.first,maxScores.top().second));
+          maxScores.pop();
+        }
       }
     }
   }
 
-  float monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
-    float ave = 0;
+  pair<int,vector<pair<int,int>>> monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
+    int nowMax = 0;
+    vector<pair<int,int>> nowOuts;
     for(int sample=0;sample<sampleNum;sample++){
       Field nextField = field;
       int nextObstacle = obstacle;
-      int sumScore = 0;
       vector<pair<int,int>> mouts = outs;
       bool alive = true;
       for(int depth=0;depth<depthNum;depth++){
@@ -477,32 +534,22 @@ public:
           continue;
         }
         mouts.push_back(pair<int,int>(pos,rot));
-        sumScore += score;
-        if(maxScore < score){
-          ans = mouts;
-          maxScore = score;
-        }
-        /*if(maxScore <= score){
+        if(maxScore <= score){
           if(maxScore == score){
-            //if(ans.size() > mouts.size())
-            if(maxCombo <= combo){
-              if(maxCombo == combo){
-                if(ans.size() > mouts.size())
-                  ans = mouts;
-              }else{
-                ans = mouts;
-                maxCombo = combo;
-              }
-            }
+            if(ans.size() > mouts.size())
+              ans = mouts;
           }else{
-            maxScore = score;
             ans = mouts;
-            maxCombo = combo;
+            maxScore = score;
           }
-          }*/
+        }
+        if(nowMax < score){
+          nowOuts = mouts;
+          nowMax = score;
+        }
       }
     }
-    return ave/sampleNum;
+    return pair<int,vector<pair<int,int>>>(nowMax,nowOuts);
   }
 };
 
