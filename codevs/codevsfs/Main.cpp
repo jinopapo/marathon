@@ -428,7 +428,7 @@ public:
           obstacle -= nowscore/5;
           doneList.push_back(bouts[ind][depth]);
           pair<int,vector<pair<int,int>>> mresult;
-          mresult = monte(50,5,nextField,obstacle,doneList,turn+depth+1);
+          mresult = monte(49,5,nextField,obstacle,doneList,turn+depth+1);
           if(score <= nowscore){
             if(score == nowscore){
               if(bouts[ind].size() > doneList.size())
@@ -493,7 +493,7 @@ public:
       p.rotate(outs[i].second);
       pair<int,int> sides = p.getSides();
       if(outs[i].first + sides.first < 0 || outs[i].first + sides.second > 9)
-        break;
+        return newOuts;
       pair<int,int> result = field.doTurn(p,outs[i].first);
       int combo = result.second;
       int score = result.first;
@@ -514,7 +514,7 @@ public:
 
   void allSearch(Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
     Pack fp = packs[mturn];
-    fp.fillWithObstacle(obstacle);
+    obstacle -= fp.fillWithObstacle(obstacle);
     for(int rot=0;rot < 4;rot++){
       Pack p = fp;
       p.rotate(rot);
@@ -540,7 +540,7 @@ public:
           maxScores.push(pair<int,int>(score,maxScores.top().second));
           maxScores.pop();
         }
-        pair<int,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle,mouts,mturn+1);
+        pair<int,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle-score/5,mouts,mturn+1);
         if(maxScores.size() < beam){
           maxScores.push(pair<int,int>(mresult.first,bouts.size()));
           bouts.push_back(mresult.second);
