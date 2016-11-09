@@ -7,7 +7,6 @@
 #include <random>
 #include <queue>
 #include <time.h>
-#include <vector>
 
 using namespace std;
 
@@ -131,21 +130,16 @@ public:
   vector<vector<int>> blocks;
   vector<vector<bool>> moved;
   vector<vector<bool>> remove;
-  int meanPos;
-
   Field() {}
   Field(int W, int H):
     W(W),
     H(H),
-    blocks(vector<vector<int>>(H, vector<int>(W, 0))),
-    meanPos(0) {}
+    blocks(vector<vector<int>>(H, vector<int>(W, 0))){}
 
   /**
    * フィールド1つ分を入力します。
    */
   void input() {
-    int bcount = 0;
-    meanPos = 0;
     blocks.clear();
     for (int i = 0; i < H; i++) {
       vector<int> row;
@@ -155,17 +149,11 @@ public:
         }else{
           int block;
           cin >> block;
-          if(block > 0 && block != OBSTACLE_BLOCK){
-            meanPos += j;
-            bcount++;
-          }
           row.push_back(block);
         }
       }
       blocks.push_back(row);
     }
-    if(bcount != 0)
-      meanPos /= bcount;
     moved.clear();
     remove.clear();
     for(int y=0;y<H;y++){
@@ -360,10 +348,12 @@ public:
   int beam;
   priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> maxScores;
   vector<vector<pair<int,int>>> bouts;
+  int debug_score;
 
   State() :
     maxScore(-1),
-    maxCombo(-1) {}
+    maxCombo(-1),
+    debug_score(0){}
 
   /**
    * Stateを入力します。Stateを生成するときは必ず呼び出してください。
@@ -411,8 +401,12 @@ public:
       int obstacle = myObstacle;
       vector<pair<int,int>> outs;
       vector<pair<int,int>> now;
+      int minScore = 0;
+      float bouns = 1.3;
       for(int i=0;i<(int)ans.size();i++){
         Pack p = packs[turn+i];
+        minScore += bouns;
+        bouns *= 1.3;
         obstacle -= p.fillWithObstacle(obstacle);
         p.rotate(ans[i].second);
         pair<int,int> sides = p.getSides();
@@ -425,6 +419,8 @@ public:
         if(score < 0)
           break;
         outs.push_back(ans[i]);
+        if(score < minScore)
+          continue;
         if(score > maxScore){
           maxScore = score;
           maxCombo = combo;
@@ -438,8 +434,11 @@ public:
       beam = 4;
     else
       beam = 1;
-    maxScores.push(pair<int,int>(maxScore,0));
-    bouts.push_back(ans);
+    if(maxScore != -1){
+
+      maxScores.push(pair<int,int>(maxScore,0));
+      bouts.push_back(ans);
+    }
     allSearch(myField,myObstacle,vector<pair<int,int>>(),turn);
     priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> nowScores = maxScores;
     vector<vector<pair<int,int>>> nowOuts = bouts;
@@ -463,14 +462,24 @@ public:
           obstacle -= nowscore/5;
           doneList.push_back(bouts[ind][depth]);
           pair<int,vector<pair<int,int>>> mresult;
-          mresult = monte(20,5,nextField,obstacle,doneList,turn+depth+1);
-          if(score < nowscore){
-            score = nowscore;
-            bouts[ind] = doneList;
+          mresult = monte(50,5,nextField,obstacle,doneList,turn+depth+1);
+          if(score <= nowscore){
+            if(score == nowscore){
+              if(bouts[ind].size() > doneList.size())
+                bouts[ind] = doneList;
+            }else{
+              score = nowscore;
+              bouts[ind] = doneList;
+            }
           }
-          if(score < mresult.first){
-            score = mresult.first;
-            bouts[ind] = mresult.second;
+          if(score <= mresult.first){
+            if(score == mresult.first){
+              if(bouts[ind].size() > mresult.second.size())
+                bouts[ind] = mresult.second;
+            }else{
+              score = mresult.first;
+              bouts[ind] = mresult.second;
+            }
           }
         }
         if(nowScores.size() < beam){
@@ -484,6 +493,10 @@ public:
       }
       beam--;
     }
+    /*myObstacle -= packs[turn].fillWithObstacle(myObstacle);
+      packs[turn].rotate(ans[0].second);
+      debug_score+= myField.doTurn(packs[turn],ans[0].first).first;
+      cerr <<debug_score << endl;*/
     cerr << ans.size() << " " << maxScore << endl;
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
@@ -527,7 +540,7 @@ public:
           maxScores.push(pair<int,int>(score,maxScores.top().second));
           maxScores.pop();
         }
-        pair<int,vector<pair<int,int>>> mresult =  monte(50,5,nextField,obstacle,mouts,mturn+1);
+        pair<int,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle,mouts,mturn+1);
         if(maxScores.size() < beam){
           maxScores.push(pair<int,int>(mresult.first,bouts.size()));
           bouts.push_back(mresult.second);
@@ -542,15 +555,26 @@ public:
 
   pair<int,vector<pair<int,int>>> monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
     int nowMax = 0;
+    int minBouns = 0;
+    float beforeBouns = 1;
+    for(int i=0;i<mturn-turn;i++){
+      beforeBouns *= 1.3;
+      minBouns += beforeBouns;
+    }
     vector<pair<int,int>> nowOuts;
     for(int sample=0;sample<sampleNum;sample++){
       Field nextField = field;
       int nextObstacle = obstacle;
       vector<pair<int,int>> mouts = outs;
       bool alive = true;
+      int minScore=minBouns;
       for(int depth=0;depth<depthNum;depth++){
         if(!alive || mturn + depth > 499)
           continue;
+        float nowBouns = minBouns;
+        for(int i=0;i<depth;i++)
+          nowBouns *= 1.3;
+        minScore += nowBouns;
         Pack p = packs[mturn+depth];
         nextObstacle -= p.fillWithObstacle(nextObstacle);
         int rot = randInt(0, 4);
@@ -567,6 +591,8 @@ public:
         }
         nextObstacle -= score/5;
         mouts.push_back(pair<int,int>(pos,rot));
+        if(score < minScore)
+          continue;
         if(maxScore <= score){
           if(maxScore == score){
             if(ans.size() > mouts.size())
@@ -576,9 +602,14 @@ public:
             maxScore = score;
           }
         }
-        if(nowMax < score){
-          nowOuts = mouts;
-          nowMax = score;
+        if(nowMax <= score){
+          if(nowMax == score){
+            if(nowOuts.size() > mouts.size())
+              nowOuts = mouts;
+          }else{
+            nowOuts = mouts;
+            nowMax = score;
+          }
         }
       }
     }
