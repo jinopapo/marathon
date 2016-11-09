@@ -395,48 +395,14 @@ public:
     bouts.clear();
     maxScores = priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>>();
     if(myObstacle > 0){
-      Field f = myField;
-      maxScore = -1;
-      maxCombo = -1;
-      int obstacle = myObstacle;
-      vector<pair<int,int>> outs;
-      vector<pair<int,int>> now;
-      int minScore = 0;
-      float bouns = 1.3;
-      for(int i=0;i<(int)ans.size();i++){
-        Pack p = packs[turn+i];
-        minScore += bouns;
-        bouns *= 1.3;
-        obstacle -= p.fillWithObstacle(obstacle);
-        p.rotate(ans[i].second);
-        pair<int,int> sides = p.getSides();
-        if(ans[i].first + sides.first < 0 || ans[i].first + sides.second > 9)
-          break;
-        pair<int,int> result = f.doTurn(p,ans[i].first);
-        int combo = result.second;
-        int score = result.first;
-        obstacle -= score/5;
-        if(score < 0)
-          break;
-        outs.push_back(ans[i]);
-        if(score < minScore)
-          continue;
-        if(score > maxScore){
-          maxScore = score;
-          maxCombo = combo;
-          now = outs;
-        }
-      }
-      ans.clear();
-      ans = now;
+      ans = ansUpdate(myField,myObstacle,ans);
     }
     if(maxScore < 100)
       beam = 4;
     else
       beam = 1;
     if(maxScore != -1){
-
-      maxScores.push(pair<int,int>(maxScore,0));
+      maxScores.push(pair<int,int>(maxScore,bouts.size()));
       bouts.push_back(ans);
     }
     allSearch(myField,myObstacle,vector<pair<int,int>>(),turn);
@@ -510,6 +476,40 @@ public:
       }
     }
     cout.flush();
+  }
+
+  vector<pair<int,int>> ansUpdate(Field field,int obstacle,vector<pair<int,int>> outs){
+    maxScore = -1;
+    maxCombo = -1;
+    int minScore = 0;
+    float bouns = 1.3;
+    vector<pair<int,int>> doneList;
+    vector<pair<int,int>> newOuts;
+    for(int i=0;i<(int)outs.size();i++){
+      Pack p = packs[turn+i];
+      minScore += bouns;
+      bouns *= 1.3;
+      obstacle -= p.fillWithObstacle(obstacle);
+      p.rotate(outs[i].second);
+      pair<int,int> sides = p.getSides();
+      if(outs[i].first + sides.first < 0 || outs[i].first + sides.second > 9)
+        break;
+      pair<int,int> result = field.doTurn(p,outs[i].first);
+      int combo = result.second;
+      int score = result.first;
+      obstacle -= score/5;
+      if(score < 0)
+        return newOuts;
+      doneList.push_back(outs[i]);
+      if(score < minScore)
+        continue;
+      if(score > maxScore){
+        maxScore = score;
+        maxCombo = combo;
+        newOuts = doneList;
+      }
+    }
+    return newOuts;
   }
 
   void allSearch(Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
