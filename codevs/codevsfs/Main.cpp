@@ -397,11 +397,11 @@ public:
     if(myObstacle > 0){
       ans = ansUpdate(myField,myObstacle,ans);
     }
-    if(maxScore < 100)
+    //if(maxScore < 100)
       beam = 4;
-    else
-      beam = 1;
-    if(maxScore != -1){
+      /*else
+        beam = 1;*/
+    if(maxScore != -1 && ans.size() != 1){
       maxScores.push(pair<int,int>(maxScore,bouts.size()));
       bouts.push_back(ans);
     }
@@ -416,6 +416,9 @@ public:
       while(!maxScores.empty()){
         int ind = maxScores.top().second;
         int score = maxScores.top().first;
+        if(ans.size() == 1){
+          cerr << "beam" << beam << " "<< score << " " <<  bouts[ind].size() << endl;
+        }
         maxScores.pop();
         vector<pair<int,int>> doneList;
         int obstacle = myObstacle;
@@ -427,6 +430,10 @@ public:
           int nowscore = nextField.doTurn(p,bouts[ind][depth].first).first;
           obstacle -= nowscore/5;
           doneList.push_back(bouts[ind][depth]);
+          if(maxScore != 0 && (float)(nowscore / maxScore) > 0.8){
+            depth = bouts[ind].size();
+            continue;
+          }
           pair<int,vector<pair<int,int>>> mresult;
           mresult = monte(50,5,nextField,obstacle,doneList,turn+depth+1);
           UpdateMax(nowscore,doneList,score,bouts[ind]);
@@ -519,19 +526,21 @@ public:
         pair<int,int> sides = p.getSides();
         if(pos + sides.first < 0 || pos + sides.second > 9)
           continue;
+        if(ans.size() == 1 && ans[0] == pair<int,int>(pos,rot))
+          continue;
         int score = nextField.doTurn(p,pos).first;
         if(score < 0)
           continue;
         mouts.push_back(pair<int,int>(pos,rot));
         UpdateMax(score,mouts,maxScore,ans);
-        if(maxScores.size() < beam){
+        /*if(maxScores.size() < beam){
           maxScores.push(pair<int,int>(score,bouts.size()));
           bouts.push_back(mouts);
         }else if(maxScores.top().first < score){
           bouts[maxScores.top().second] = mouts;
           maxScores.push(pair<int,int>(score,maxScores.top().second));
           maxScores.pop();
-        }
+          }*/
         pair<int,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle-score/5,mouts,mturn+1);
         if(maxScores.size() < beam){
           maxScores.push(pair<int,int>(mresult.first,bouts.size()));
@@ -586,6 +595,8 @@ public:
         if(score < minScore)
           continue;
         UpdateMax(score,mouts,maxScore,ans);
+        if(mouts.size() == 1)
+          continue;
         UpdateMax(score,mouts,nowMax,nowOuts);
       }
     }
