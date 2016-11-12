@@ -416,9 +416,6 @@ public:
       while(!maxScores.empty()){
         int ind = maxScores.top().second;
         int score = maxScores.top().first;
-        if(ans.size() == 1){
-          cerr << "beam" << beam << " "<< score << " " <<  bouts[ind].size() << endl;
-        }
         maxScores.pop();
         vector<pair<int,int>> doneList;
         int obstacle = myObstacle;
@@ -533,14 +530,6 @@ public:
           continue;
         mouts.push_back(pair<int,int>(pos,rot));
         UpdateMax(score,mouts,maxScore,ans);
-        /*if(maxScores.size() < beam){
-          maxScores.push(pair<int,int>(score,bouts.size()));
-          bouts.push_back(mouts);
-        }else if(maxScores.top().first < score){
-          bouts[maxScores.top().second] = mouts;
-          maxScores.push(pair<int,int>(score,maxScores.top().second));
-          maxScores.pop();
-          }*/
         pair<int,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle-score/5,mouts,mturn+1);
         if(maxScores.size() < beam){
           maxScores.push(pair<int,int>(mresult.first,bouts.size()));
