@@ -397,10 +397,7 @@ public:
     if(myObstacle > 0){
       ans = ansUpdate(myField,myObstacle,ans);
     }
-    //if(maxScore < 100)
-      beam = 4;
-      /*else
-        beam = 1;*/
+    beam = 4;
     if(maxScore != -1 && ans.size() != 1){
       maxScores.push(pair<int,int>(maxScore,bouts.size()));
       bouts.push_back(ans);
