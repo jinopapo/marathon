@@ -10,6 +10,47 @@
 
 using namespace std;
 
+struct Score{
+  int score;
+  int turn;
+  int combo;
+  int block;
+
+  bool operator<(const Score& a) const {
+    if(score == a.score){
+      if(block == a.block){
+          /*if(turn == a.turn){
+          return combo < a.combo;
+          }else{*/
+        return turn < a.turn;  
+        //}
+      }else{
+        return block < a.block;
+      }
+    }else{
+      return score < a.score;
+    }
+  }
+
+  bool operator>(const Score& a) const {
+    if(score == a.score){
+      if(block == a.block){
+      /*if(turn == a.turn){
+          return combo > a.combo;
+          }else{*/
+        return turn > a.turn;
+          //}
+      }else{
+        return block > a.block;
+      }
+    }else{
+      return score > a.score;
+    }
+  }
+};
+
+#define pq priority_queue<pair<Score,int>,vector<pair<Score,int>>,greater<pair<Score,int>>>
+
 /** ブロックが置かれていない場所の値 */
 static const int EMPTY_BLOCK = 0;
 
@@ -312,6 +353,17 @@ public:
     return (y >= 0 && y < H && x >= 0 && x < W);
   }
 
+  int countBlock(){
+    int count = 0;
+    for(int y=0;y<H;y++){
+      for(int x=0;x<W;x++){
+        if(blocks[y][x] > 0 && blocks[y][x] < 10)
+          count++;
+      }
+    }
+    return count;
+  }
+
   pair<int,int> doTurn(Pack p,int pos){
     fallPack(p,pos);
     int combo = 0;
@@ -343,14 +395,14 @@ public:
   int myObstacle;
   int enemyObstacle;
   vector<pair<int,int>> ans;
-  pair<int,int> maxScore;
+  Score maxScore;
   int beam;
-  priority_queue<pair<pair<int,int>,int>,vector<pair<pair<int,int>,int>>,greater<pair<pair<int,int>,int>>> maxScores;
+  pq maxScores;
   vector<vector<pair<int,int>>> bouts;
   int debug_score;
 
   State() :
-    maxScore(pair<int,int>(-1,-1)),
+    maxScore(Score({-1,-1,-1,-1})),
     debug_score(0){}
 
   /**
@@ -391,26 +443,26 @@ public:
    */
   void executeTurn() {
     bouts.clear();
-    maxScores = priority_queue<pair<pair<int,int>,int>,vector<pair<pair<int,int>,int>>,greater<pair<pair<int,int>,int>>>();
+    maxScores = pq();
     if(myObstacle > 0){
       ans = ansUpdate(myField,myObstacle,ans);
     }
     beam = 4;
-    if(maxScore.first != -1 && ans.size() != 1){
-      maxScores.push(pair<pair<int,int>,int>(maxScore,bouts.size()));
+    if(maxScore.score != -1 && ans.size() != 1){
+      maxScores.push(pair<Score,int>(maxScore,bouts.size()));
       bouts.push_back(ans);
     }
     allSearch(myField,myObstacle,vector<pair<int,int>>(),turn);
-    priority_queue<pair<pair<int,int>,int>,vector<pair<pair<int,int>,int>>,greater<pair<pair<int,int>,int>>> nowScores = maxScores;
+    pq nowScores = maxScores;
     vector<vector<pair<int,int>>> nowOuts = bouts;
     while(beam != 0){
       maxScores = nowScores;
       bouts = nowOuts;
-      nowScores = priority_queue<pair<pair<int,int>,int>,vector<pair<pair<int,int>,int>>,greater<pair<pair<int,int>,int>>>();
+      nowScores = pq();
       nowOuts.clear();
       while(!maxScores.empty()){
         int ind = maxScores.top().second;
-        pair<int,int> score = maxScores.top().first;
+        Score score = maxScores.top().first;
         maxScores.pop();
         vector<pair<int,int>> doneList;
         int obstacle = myObstacle;
@@ -420,24 +472,27 @@ public:
           obstacle -= p.fillWithObstacle(obstacle);
           p.rotate(bouts[ind][depth].second);
           pair<int,int> nresult = nextField.doTurn(p,bouts[ind][depth].first);
-          int nowscore = nresult.first;
-          int nowcombo = nresult.second;
-          obstacle -= nowscore/5;
+          Score s;
+          s.score = nresult.first;
+          s.combo = nresult.second;
+          obstacle -= s.score/5;
           doneList.push_back(bouts[ind][depth]);
-          if(maxScore.first != 0 && (float)(nowscore / maxScore.first) > 0.8){
+          s.turn = doneList.size();
+          s.block = nextField.countBlock();
+          if(maxScore.score != 0 && (float)(s.score / maxScore.score) > 0.8){
             depth = bouts[ind].size();
             continue;
           }
-          pair<pair<int,int>,vector<pair<int,int>>> mresult = monte(50,5,nextField,obstacle,doneList,turn+depth+1);
-          UpdateMax(pair<int,int>(nowscore,doneList.size()),doneList,score,bouts[ind]);
-          UpdateMax(pair<int,int>(mresult.first.first,mresult.first.second),mresult.second,score,bouts[ind]);
+          pair<Score,vector<pair<int,int>>> mresult = monte(50,5,nextField,obstacle,doneList,turn+depth+1);
+          UpdateMax(s,doneList,score,bouts[ind]);
+          UpdateMax(mresult.first,mresult.second,score,bouts[ind]);
         }
         if(nowScores.size() < beam){
-          nowScores.push(pair<pair<int,int>,int>(score,nowOuts.size()));
+          nowScores.push(pair<Score,int>(score,nowOuts.size()));
           nowOuts.push_back(bouts[ind]);
         }else if(nowScores.top().first < score){
           nowOuts[nowScores.top().second] = bouts[ind];
-          nowScores.push(pair<pair<int,int>,int>(score,nowScores.top().second));
+          nowScores.push(pair<Score,int>(score,nowScores.top().second));
           nowScores.pop();
         }
       }
@@ -445,15 +500,14 @@ public:
     }
     //debugScore();
 
-    cerr << ans.size() << " " << maxScore.first << endl;
+    cerr << ans.size() << " " << maxScore.score << endl;
     if((int)ans.size() == 0){
       cout << 0 << " " << 0 << endl;
     }else{
       cout << ans[0].first << " " << ans[0].second << endl;
       ans.erase(ans.begin());
       if((int)ans.size() == 0){
-        maxScore.first = -1;
-        maxScore.second = -1;
+        maxScore = {-1,-1,-1,-1};
       }
     }
     cout.flush();
@@ -466,16 +520,15 @@ public:
     cerr <<debug_score << endl;
   }
 
-  void UpdateMax(pair<int,int> newScore,vector<pair<int,int>> newOuts,pair<int,int>& oldScore,vector<pair<int,int>>& oldOuts){
-    if(oldScore.first < newScore.first){
+  void UpdateMax(Score newScore,vector<pair<int,int>> newOuts,Score& oldScore,vector<pair<int,int>>& oldOuts){
+    if(oldScore < newScore){
       oldScore = newScore;
       oldOuts = newOuts;
     }
   }
 
   vector<pair<int,int>> ansUpdate(Field field,int obstacle,vector<pair<int,int>> outs){
-    maxScore.first = -1;
-    maxScore.second = -1;
+    maxScore = {-1,-1,-1,-1};
     int minScore = 0;
     float bouns = 1.3;
     vector<pair<int,int>> doneList;
@@ -490,15 +543,18 @@ public:
       if(outs[i].first + sides.first < 0 || outs[i].first + sides.second > 9)
         return newOuts;
       pair<int,int> result = field.doTurn(p,outs[i].first);
-      int combo = result.second;
-      int score = result.first;
-      obstacle -= score/5;
-      if(score < 0)
+      Score s;
+      s.combo = result.second;
+      s.score = result.first;
+      obstacle -= s.score/5;
+      if(s.score < 0)
         return newOuts;
       doneList.push_back(outs[i]);
-      if(score < minScore)
+      s.turn = doneList.size();
+      s.block = field.countBlock();
+      if(s.score < minScore)
         continue;
-      UpdateMax(pair<int,int>(score,doneList.size()),doneList,maxScore,newOuts);
+      UpdateMax(s,doneList,maxScore,newOuts);
     }
     return newOuts;
   }
@@ -518,27 +574,30 @@ public:
         if(ans.size() == 1 && ans[0] == pair<int,int>(pos,rot))
           continue;
         pair<int,int> nresult = nextField.doTurn(p,pos);
-        int score = nresult.first;
-        int combo = nresult.second;
-        if(score < 0)
+        Score s;
+        s.score = nresult.first;
+        s.combo = nresult.second;
+        if(s.score < 0)
           continue;
         mouts.push_back(pair<int,int>(pos,rot));
-        UpdateMax(pair<int,int>(score,mouts.size()),mouts,maxScore,ans);
-        pair<pair<int,int>,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle-score/5,mouts,mturn+1);
+        s.turn = mouts.size();
+        s.block = nextField.countBlock();
+        UpdateMax(s,mouts,maxScore,ans);
+        pair<Score,vector<pair<int,int>>> mresult =  monte(30,5,nextField,obstacle-s.score/5,mouts,mturn+1);
         if(maxScores.size() < beam){
-          maxScores.push(pair<pair<int,int>,int>(mresult.first,bouts.size()));
+          maxScores.push(pair<Score,int>(mresult.first,bouts.size()));
           bouts.push_back(mresult.second);
-        }else if(maxScores.top().first.first < mresult.first.first){
+        }else if(maxScores.top().first < mresult.first){
           bouts[maxScores.top().second] = mresult.second;
-          maxScores.push(pair<pair<int,int>,int>(mresult.first,maxScores.top().second));
+          maxScores.push(pair<Score,int>(mresult.first,maxScores.top().second));
           maxScores.pop();
         }
       }
     }
   }
 
-  pair<pair<int,int>,vector<pair<int,int>>> monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
-    pair<int,int> nowMax = pair<int,int>(0,0);
+  pair<Score,vector<pair<int,int>>> monte(int sampleNum,int depthNum,Field field,int obstacle,vector<pair<int,int>> outs,int mturn){
+    Score nowMax = {-1,-1,-1,-1};
     int minBouns = 0;
     float beforeBouns = 1;
     for(int i=0;i<mturn-turn;i++){
@@ -567,23 +626,26 @@ public:
         int packWidth = sides.second - sides.first + 1;
         int pos = randInt(0, W - packWidth + 1) - sides.first;
         pair<int,int> result = nextField.doTurn(p,pos);
-        int score = result.first;
-        int combo = result.second;
-        if(score < 0){
+        Score s;
+        s.score = result.first;
+        s.combo = result.second;
+        if(s.score < 0){
           alive = false;
           continue;
         }
-        nextObstacle -= score/5;
+        nextObstacle -= s.score/5;
         mouts.push_back(pair<int,int>(pos,rot));
-        if(score < minScore)
+        s.turn = mouts.size();
+        s.block = nextField.countBlock();
+        if(s.score < minScore)
           continue;
-        UpdateMax(pair<int,int>(score,mouts.size()),mouts,maxScore,ans);
+        UpdateMax(s,mouts,maxScore,ans);
         if(mouts.size() == 1)
           continue;
-        UpdateMax(pair<int,int>(score,mouts.size()),mouts,nowMax,nowOuts);
+        UpdateMax(s,mouts,nowMax,nowOuts);
       }
     }
-    return pair<pair<int,int>,vector<pair<int,int>>>(nowMax,nowOuts);
+    return pair<Score,vector<pair<int,int>>>(nowMax,nowOuts);
   }
 };
 
@@ -607,3 +669,4 @@ int main() {
     state.executeTurn();
   }
 }
+
